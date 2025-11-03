@@ -398,14 +398,14 @@ async function handleStreamResponse(
                     try {
                         const json = JSON.parse(trimmed.slice(6));
                         const delta = json.choices?.[0]?.delta;
-                        
+
                         // 检查是否有思考内容（reasoning_content）
                         if (options.enableThinking && delta?.reasoning_content) {
                             isThinkingPhase = true;
                             thinkingText += delta.reasoning_content;
                             options.onThinkingChunk?.(delta.reasoning_content);
                         }
-                        
+
                         // 普通内容
                         const content = delta?.content;
                         if (content) {

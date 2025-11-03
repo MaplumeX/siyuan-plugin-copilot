@@ -36,7 +36,7 @@
     let textareaElement: HTMLTextAreaElement;
     let inputContainer: HTMLElement;
     let fileInputElement: HTMLInputElement;
-    
+
     // 思考过程折叠状态管理
     let thinkingCollapsed: Record<number, boolean> = {};
 
@@ -561,7 +561,7 @@
         try {
             // 检查是否启用思考模式
             const enableThinking = modelConfig.capabilities?.thinking || false;
-            
+
             await chat(
                 currentProvider,
                 {
@@ -573,16 +573,20 @@
                     stream: true,
                     signal: abortController.signal, // 传递 AbortSignal
                     enableThinking, // 启用思考模式
-                    onThinkingChunk: enableThinking ? async (chunk: string) => {
-                        isThinkingPhase = true;
-                        streamingThinking += chunk;
-                        await scrollToBottom();
-                    } : undefined,
-                    onThinkingComplete: enableThinking ? (thinking: string) => {
-                        isThinkingPhase = false;
-                        // 思考完成后自动折叠
-                        thinkingCollapsed[messages.length] = true;
-                    } : undefined,
+                    onThinkingChunk: enableThinking
+                        ? async (chunk: string) => {
+                              isThinkingPhase = true;
+                              streamingThinking += chunk;
+                              await scrollToBottom();
+                          }
+                        : undefined,
+                    onThinkingComplete: enableThinking
+                        ? (thinking: string) => {
+                              isThinkingPhase = false;
+                              // 思考完成后自动折叠
+                              thinkingCollapsed[messages.length] = true;
+                          }
+                        : undefined,
                     onChunk: async (chunk: string) => {
                         streamingMessage += chunk;
                         await scrollToBottom();
@@ -592,12 +596,12 @@
                             role: 'assistant',
                             content: fullText,
                         };
-                        
+
                         // 如果有思考内容，添加到消息中
                         if (enableThinking && streamingThinking) {
                             assistantMessage.thinking = streamingThinking;
                         }
-                        
+
                         messages = [...messages, assistantMessage];
                         streamingMessage = '';
                         streamingThinking = '';
@@ -641,7 +645,7 @@
             if (streamingMessage || streamingThinking) {
                 const message: Message = {
                     role: 'assistant',
-                    content: streamingMessage + '\n\n[生成已中断]'
+                    content: streamingMessage + '\n\n[生成已中断]',
                 };
                 if (streamingThinking) {
                     message.thinking = streamingThinking;
@@ -1506,7 +1510,10 @@
                                 thinkingCollapsed[index] = !thinkingCollapsed[index];
                             }}
                         >
-                            <svg class="ai-message__thinking-icon" class:collapsed={thinkingCollapsed[index]}>
+                            <svg
+                                class="ai-message__thinking-icon"
+                                class:collapsed={thinkingCollapsed[index]}
+                            >
                                 <use xlink:href="#iconRight"></use>
                             </svg>
                             <span class="ai-message__thinking-title">💭 思考过程</span>
@@ -1534,7 +1541,7 @@
                     <span class="ai-message__role">🤖 AI</span>
                     <span class="ai-message__streaming-indicator">●</span>
                 </div>
-                
+
                 <!-- 显示流式思考过程 -->
                 {#if streamingThinking}
                     <div class="ai-message__thinking">
@@ -1551,13 +1558,15 @@
                                 {@html formatMessage(streamingThinking)}
                             </div>
                         {:else}
-                            <div class="ai-message__thinking-content ai-message__thinking-content--streaming protyle-wysiwyg">
+                            <div
+                                class="ai-message__thinking-content ai-message__thinking-content--streaming protyle-wysiwyg"
+                            >
                                 {@html formatMessage(streamingThinking)}
                             </div>
                         {/if}
                     </div>
                 {/if}
-                
+
                 {#if streamingMessage}
                     <div class="ai-message__content protyle-wysiwyg">
                         {@html formatMessage(streamingMessage)}
@@ -1647,7 +1656,7 @@
                 bind:value={currentInput}
                 on:keydown={handleKeydown}
                 on:paste={handlePaste}
-                placeholder="输入消息... (Ctrl+Enter 发送，可拖入文档或粘贴图片)"
+                placeholder="输入消息... (Ctrl+Enter 发送，可拖入文档、块或粘贴图片)"
                 class="ai-sidebar__input"
                 disabled={isLoading}
                 rows="1"

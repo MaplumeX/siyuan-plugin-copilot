@@ -195,7 +195,9 @@
                 <div class="modal-header">
                     <h4>搜索并添加模型</h4>
                     <button class="modal-close" on:click={closeModelSearchModal}>
-                        <svg class="b3-button__icon" style="width: 13px;height: 13px"><use xlink:href="#iconClose"></use></svg>
+                        <svg class="b3-button__icon" style="width: 13px;height: 13px">
+                            <use xlink:href="#iconClose"></use>
+                        </svg>
                     </button>
                 </div>
                 <div class="modal-body">
@@ -298,10 +300,14 @@
                                         type="checkbox"
                                         class="b3-switch"
                                         checked={model.capabilities?.thinking || false}
-                                        on:change={(e) => {
+                                        on:change={e => {
                                             if (!model.capabilities) model.capabilities = {};
                                             model.capabilities.thinking = e.currentTarget.checked;
-                                            updateModel(model.id, 'capabilities', model.capabilities);
+                                            updateModel(
+                                                model.id,
+                                                'capabilities',
+                                                model.capabilities
+                                            );
                                         }}
                                     />
                                     <span class="capability-label">思考模式 (Thinking)</span>
@@ -311,10 +317,14 @@
                                         type="checkbox"
                                         class="b3-switch"
                                         checked={model.capabilities?.vision || false}
-                                        on:change={(e) => {
+                                        on:change={e => {
                                             if (!model.capabilities) model.capabilities = {};
                                             model.capabilities.vision = e.currentTarget.checked;
-                                            updateModel(model.id, 'capabilities', model.capabilities);
+                                            updateModel(
+                                                model.id,
+                                                'capabilities',
+                                                model.capabilities
+                                            );
                                         }}
                                     />
                                     <span class="capability-label">视觉 (Vision)</span>
@@ -334,7 +344,9 @@
                 <div class="modal-header">
                     <h4>手动添加模型</h4>
                     <button class="modal-close" on:click={closeAddModelModal}>
-                        <svg class="b3-button__icon" style="width: 13px;height: 13px"><use xlink:href="#iconClose"></use></svg>
+                        <svg class="b3-button__icon" style="width: 13px;height: 13px">
+                            <use xlink:href="#iconClose"></use>
+                        </svg>
                     </button>
                 </div>
                 <div class="modal-body">
