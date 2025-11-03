@@ -1565,14 +1565,14 @@
             <button
                 class="b3-button ai-sidebar__send-btn"
                 class:b3-button--primary={!isLoading}
-                class:b3-button--cancel={isLoading}
+                class:ai-sidebar__send-btn--abort={isLoading}
                 on:click={isLoading ? abortMessage : sendMessage}
                 disabled={!isLoading && !currentInput.trim() && currentAttachments.length === 0}
                 title={isLoading ? '中断生成 (Ctrl+Enter)' : '发送消息 (Ctrl+Enter)'}
             >
                 {#if isLoading}
                     <svg class="b3-button__icon">
-                        <use xlink:href="#iconClose"></use>
+                        <use xlink:href="#iconPause"></use>
                     </svg>
                 {:else}
                     <svg class="b3-button__icon"><use xlink:href="#iconLeft"></use></svg>
@@ -2465,12 +2465,12 @@
             cursor: not-allowed;
         }
 
-        &.b3-button--cancel {
-            background-color: var(--b3-theme-error);
-            color: var(--b3-theme-on-error);
+        &.ai-sidebar__send-btn--abort {
+            background-color: #ef4444;
+            color: white;
 
             &:hover {
-                background-color: var(--b3-theme-error-light);
+                background-color: #dc2626;
             }
         }
     }

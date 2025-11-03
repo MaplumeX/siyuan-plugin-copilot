@@ -195,7 +195,7 @@
                 <div class="modal-header">
                     <h4>搜索并添加模型</h4>
                     <button class="modal-close" on:click={closeModelSearchModal}>
-                        <svg class="b3-button__icon"><use xlink:href="#iconClose"></use></svg>
+                        <svg class="b3-button__icon" style="width: 13px;height: 13px"><use xlink:href="#iconClose"></use></svg>
                     </button>
                 </div>
                 <div class="modal-body">
@@ -303,7 +303,7 @@
                 <div class="modal-header">
                     <h4>手动添加模型</h4>
                     <button class="modal-close" on:click={closeAddModelModal}>
-                        <svg class="b3-button__icon"><use xlink:href="#iconClose"></use></svg>
+                        <svg class="b3-button__icon" style="width: 13px;height: 13px"><use xlink:href="#iconClose"></use></svg>
                     </button>
                 </div>
                 <div class="modal-body">
