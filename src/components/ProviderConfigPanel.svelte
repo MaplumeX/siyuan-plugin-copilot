@@ -88,7 +88,7 @@
     // 手动添加模型
     function addManualModel() {
         if (!manualModelId.trim()) {
-            pushErrMsg('请输入模型ID');
+            pushErrMsg(t('models.idRequired'));
             return;
         }
 
@@ -207,7 +207,7 @@
     </div>
 
     <div class="provider-config__section">
-        <div class="b3-label">
+        <div >
             <div class="b3-label__text">API Key</div>
             <input
                 class="b3-text-field fn__flex-1"
@@ -218,7 +218,7 @@
             />
         </div>
 
-        <div class="b3-label">
+        <div >
             <div class="b3-label__text">
                 {t('platform.apiUrl')}
                 {#if defaultApiUrl}
@@ -237,7 +237,7 @@
             </div>
         </div>
 
-        <div class="b3-label">
+        <div>
             <div class="b3-label__text">{t('models.management')}</div>
             <div class="provider-config__model-buttons">
                 <button
@@ -361,7 +361,7 @@
                         <div class="model-config-item">
                             <span>{t('models.capabilities')}</span>
                             <div class="model-capabilities">
-                                <label class="b3-label b3-label--noborder">
+                                <label class="">
                                     <input
                                         type="checkbox"
                                         class="b3-switch"
@@ -378,7 +378,7 @@
                                     />
                                     <span class="capability-label">{t('models.thinking')}</span>
                                 </label>
-                                <label class="b3-label b3-label--noborder">
+                                <label class="">
                                     <input
                                         type="checkbox"
                                         class="b3-switch"
@@ -416,23 +416,23 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <div class="b3-label">
-                        <div class="b3-label__text">模型ID *</div>
+                    <div>
+                        <div class="b3-label__text">{t('models.id')}</div>
                         <input
                             class="b3-text-field fn__flex-1"
                             type="text"
                             bind:value={manualModelId}
-                            placeholder="例如: gpt-4, gemini-pro"
+                            placeholder={t('models.idPlaceholder')}
                             on:keydown={e => e.key === 'Enter' && addManualModel()}
                         />
                     </div>
-                    <div class="b3-label">
-                        <div class="b3-label__text">模型名称（可选）</div>
+                    <div>
+                        <div class="b3-label__text">{t('models.name')}</div>
                         <input
                             class="b3-text-field fn__flex-1"
                             type="text"
                             bind:value={manualModelName}
-                            placeholder="不填则使用模型ID"
+                            placeholder={t('models.namePlaceholder')}
                             on:keydown={e => e.key === 'Enter' && addManualModel()}
                         />
                     </div>

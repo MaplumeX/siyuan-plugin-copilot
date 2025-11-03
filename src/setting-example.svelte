@@ -435,7 +435,7 @@
                                     <div class="platform-item__info">
                                         <span class="platform-item__name">{platform.name}</span>
                                         <span class="platform-item__type">
-                                            {platform.type === 'built-in' ? '内置' : '自定义'}
+                                            {platform.type === 'built-in' ? t('platform.type.builtin') : t('platform.type.custom')}
                                         </span>
                                     </div>
                                     <button
