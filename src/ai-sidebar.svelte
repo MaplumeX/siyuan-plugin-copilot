@@ -256,7 +256,7 @@
 
         // 用户消息只保存原始输入（不包含文档内容）
         const userContent = currentInput.trim();
-        
+
         const userMessage: Message = {
             role: 'user',
             content: userContent,
@@ -272,11 +272,13 @@
 
         // 准备发送给AI的消息（包含系统提示词和上下文文档）
         // 深拷贝消息数组，避免修改原始消息
-        const messagesToSend = messages.filter(msg => msg.role !== 'system').map(msg => ({
-            role: msg.role,
-            content: msg.content
-        }));
-        
+        const messagesToSend = messages
+            .filter(msg => msg.role !== 'system')
+            .map(msg => ({
+                role: msg.role,
+                content: msg.content,
+            }));
+
         // 如果有上下文文档，将其添加到最后一条用户消息中（仅用于发送给AI）
         if (contextDocuments.length > 0 && messagesToSend.length > 0) {
             const lastMessage = messagesToSend[messagesToSend.length - 1];
@@ -287,10 +289,11 @@
                 lastMessage.content = `以下是相关文档作为上下文：\n\n${contextText}\n\n---\n\n我的问题：${userContent}`;
             }
         }
-        
+
         if (settings.aiSystemPrompt) {
             messagesToSend.unshift({ role: 'system', content: settings.aiSystemPrompt });
-        }        try {
+        }
+        try {
             await chat(
                 currentProvider,
                 {
