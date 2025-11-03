@@ -22,7 +22,12 @@
         volcano: '火山引擎',
     };
 
-    let expandedProviders: Set<string> = new Set([currentProvider]);
+    let expandedProviders: Set<string> = new Set();
+
+    // 响应currentProvider变化，自动展开当前平台
+    $: if (currentProvider) {
+        expandedProviders = new Set([currentProvider]);
+    }
 
     function toggleProvider(providerId: string) {
         if (expandedProviders.has(providerId)) {

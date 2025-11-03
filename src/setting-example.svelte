@@ -3,10 +3,9 @@
     import SettingPanel from '@/libs/components/setting-panel.svelte';
     import { t } from './utils/i18n';
     import { getDefaultSettings } from './defaultSettings';
-    import { pushMsg } from './api';
+    import { pushMsg, pushErrMsg } from './api';
     import { confirm } from 'siyuan';
     import ProviderConfigPanel from './components/ProviderConfigPanel.svelte';
-    import CustomProviderManager from './components/CustomProviderManager.svelte';
     import type { CustomProviderConfig } from './defaultSettings';
     export let plugin;
 
@@ -26,28 +25,107 @@
         volcano: '火山引擎',
     };
 
+    // 内置平台的默认 API 地址
+    const builtInProviderDefaultUrls: Record<string, string> = {
+        gemini: 'https://generativelanguage.googleapis.com',
+        deepseek: 'https://api.deepseek.com',
+        openai: 'https://api.openai.com',
+        volcano: 'https://ark.cn-beijing.volces.com',
+    };
+
     // 当前选中的平台ID
     let selectedProviderId = '';
+
+    // 新增自定义平台相关状态
+    let showAddPlatform = false;
+    let newPlatformName = '';
 
     function handleProviderChange() {
         saveSettings();
     }
 
-    function handleCustomProvidersChange() {
+    // 生成自定义平台ID
+    function generateCustomPlatformId(): string {
+        return `custom_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    }
+
+    // 添加自定义平台
+    function addCustomPlatform() {
+        if (!newPlatformName.trim()) {
+            pushErrMsg('请输入平台名称');
+            return;
+        }
+
+        const newPlatform: CustomProviderConfig = {
+            id: generateCustomPlatformId(),
+            name: newPlatformName.trim(),
+            apiKey: '',
+            customApiUrl: '',
+            models: [],
+        };
+
+        settings.aiProviders.customProviders = [
+            ...settings.aiProviders.customProviders,
+            newPlatform,
+        ];
+        newPlatformName = '';
+        showAddPlatform = false;
         saveSettings();
+        pushMsg(`已添加自定义平台: ${newPlatform.name}`);
+    }
+
+    // 删除平台（内置平台也可删除）
+    function removePlatform(providerId: string) {
+        const platformName =
+            builtInProviderNames[providerId] ||
+            settings.aiProviders.customProviders.find(p => p.id === providerId)?.name ||
+            '未知平台';
+
+        confirm('删除平台', `确定要删除平台 "${platformName}" 吗？`, async () => {
+            // 如果是内置平台，删除其所有配置
+            if (builtInProviderNames[providerId]) {
+                settings.aiProviders[providerId] = {
+                    apiKey: '',
+                    customApiUrl: '',
+                    models: [],
+                };
+            } else {
+                // 如果是自定义平台，从列表中移除
+                settings.aiProviders.customProviders = settings.aiProviders.customProviders.filter(
+                    p => p.id !== providerId
+                );
+            }
+
+            // 如果删除的是当前选中的平台，清空选择
+            if (selectedProviderId === providerId) {
+                selectedProviderId = '';
+                settings.selectedProviderId = '';
+                settings.currentProvider = '';
+                settings.currentModelId = '';
+            }
+
+            saveSettings();
+            pushMsg(`已删除平台: ${platformName}`);
+        });
     }
 
     // 获取所有平台选项（内置+自定义）
-    function getAllProviderOptions(): Array<{ id: string; name: string }> {
+    function getAllProviderOptions(): Array<{
+        id: string;
+        name: string;
+        type: 'built-in' | 'custom';
+    }> {
         const builtIn = Object.keys(builtInProviderNames).map(id => ({
             id,
             name: builtInProviderNames[id],
+            type: 'built-in' as const,
         }));
 
         const custom = (settings.aiProviders?.customProviders || []).map(
             (p: CustomProviderConfig) => ({
                 id: p.id,
                 name: p.name,
+                type: 'custom' as const,
             })
         );
 
@@ -71,6 +149,8 @@
     // 保存选中的平台ID
     function handleProviderSelect() {
         settings.selectedProviderId = selectedProviderId;
+        // 兼容ai-sidebar.svelte，同时保存currentProvider
+        settings.currentProvider = selectedProviderId;
         saveSettings();
     }
 
@@ -179,12 +259,18 @@
             settings.aiProviders.customProviders = [];
         }
 
-        // 恢复选中的平台ID
-        selectedProviderId = settings.selectedProviderId || 'openai';
+        // 恢复选中的平台ID，确保兼容性
+        selectedProviderId = settings.selectedProviderId || settings.currentProvider || 'openai';
 
         updateGroupItems();
         // 确保设置已保存（可能包含新的默认值）
         await saveSettings();
+
+        // 双向同步，确保 currentProvider 和 selectedProviderId 一致
+        settings.currentProvider = selectedProviderId;
+        settings.selectedProviderId = selectedProviderId;
+        await saveSettings();
+
         console.debug('加载配置文件完成');
     }
 
@@ -228,47 +314,100 @@
                 />
 
                 <div class="provider-configs">
-                    <!-- 自定义平台管理 -->
-                    <CustomProviderManager
-                        bind:customProviders={settings.aiProviders.customProviders}
-                        on:change={handleCustomProvidersChange}
-                    />
-
-                    <!-- 平台选择下拉框 -->
-                    <div class="provider-selector">
-                        <div class="b3-label">
-                            <div class="b3-label__text">选择要配置的平台</div>
-                            <select
-                                class="b3-select fn__flex-1"
-                                bind:value={selectedProviderId}
-                                on:change={handleProviderSelect}
+                    <!-- 统一平台管理面板 -->
+                    <div class="unified-platform-manager">
+                        <div class="manager-header">
+                            <h5>平台管理</h5>
+                            <button
+                                class="b3-button b3-button--outline"
+                                on:click={() => (showAddPlatform = !showAddPlatform)}
                             >
-                                <option value="" disabled>请选择平台</option>
-                                {#each getAllProviderOptions() as option}
-                                    <option value={option.id}>{option.name}</option>
-                                {/each}
-                            </select>
+                                {showAddPlatform ? '取消' : '+ 添加平台'}
+                            </button>
+                        </div>
+
+                        <!-- 添加平台表单 -->
+                        {#if showAddPlatform}
+                            <div class="add-platform-form">
+                                <div class="b3-label">
+                                    <div class="b3-label__text">平台名称</div>
+                                    <input
+                                        class="b3-text-field fn__flex-1"
+                                        type="text"
+                                        bind:value={newPlatformName}
+                                        placeholder="例如: Claude API, 本地LLM"
+                                        on:keydown={e => e.key === 'Enter' && addCustomPlatform()}
+                                    />
+                                </div>
+                                <button
+                                    class="b3-button b3-button--outline"
+                                    on:click={addCustomPlatform}
+                                    disabled={!newPlatformName.trim()}
+                                >
+                                    确认添加
+                                </button>
+                            </div>
+                        {/if}
+
+                        <!-- 平台列表 -->
+                        <div class="platform-list">
+                            {#each getAllProviderOptions() as platform}
+                                <div
+                                    class="platform-item"
+                                    class:platform-item--selected={selectedProviderId ===
+                                        platform.id}
+                                    on:click={() => {
+                                        selectedProviderId = platform.id;
+                                        handleProviderSelect();
+                                    }}
+                                >
+                                    <div class="platform-item__info">
+                                        <span class="platform-item__name">{platform.name}</span>
+                                        <span class="platform-item__type">
+                                            {platform.type === 'built-in' ? '内置' : '自定义'}
+                                        </span>
+                                    </div>
+                                    <button
+                                        class="b3-button b3-button--text b3-button--error"
+                                        on:click|stopPropagation={() => removePlatform(platform.id)}
+                                        title="删除平台"
+                                    >
+                                        <svg class="b3-button__icon">
+                                            <use xlink:href="#iconTrashcan"></use>
+                                        </svg>
+                                    </button>
+                                </div>
+                            {/each}
+                            {#if getAllProviderOptions().length === 0}
+                                <div class="empty-hint">暂无可用平台</div>
+                            {/if}
                         </div>
                     </div>
 
                     <!-- 显示选中平台的配置 -->
                     {#if selectedProviderId}
                         {#if builtInProviderNames[selectedProviderId]}
-                            <ProviderConfigPanel
-                                providerId={selectedProviderId}
-                                providerName={getSelectedProviderName()}
-                                bind:config={settings.aiProviders[selectedProviderId]}
-                                on:change={handleProviderChange}
-                            />
+                            {#key selectedProviderId}
+                                <ProviderConfigPanel
+                                    providerId={selectedProviderId}
+                                    providerName={getSelectedProviderName()}
+                                    defaultApiUrl={builtInProviderDefaultUrls[selectedProviderId]}
+                                    bind:config={settings.aiProviders[selectedProviderId]}
+                                    on:change={handleProviderChange}
+                                />
+                            {/key}
                         {:else}
                             {#each settings.aiProviders.customProviders as customProvider}
                                 {#if customProvider.id === selectedProviderId}
-                                    <ProviderConfigPanel
-                                        providerId={customProvider.id}
-                                        providerName={customProvider.name}
-                                        bind:config={customProvider}
-                                        on:change={handleProviderChange}
-                                    />
+                                    {#key customProvider.id}
+                                        <ProviderConfigPanel
+                                            providerId={customProvider.id}
+                                            providerName={customProvider.name}
+                                            defaultApiUrl=""
+                                            bind:config={customProvider}
+                                            on:change={handleProviderChange}
+                                        />
+                                    {/key}
                                 {/if}
                             {/each}
                         {/if}
@@ -317,9 +456,94 @@
         gap: 16px;
     }
 
-    .provider-selector {
+    // 移除不再使用的样式
+
+    .unified-platform-manager {
         background: var(--b3-theme-surface);
         border-radius: 6px;
         padding: 16px;
+    }
+
+    .manager-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+
+        h5 {
+            margin: 0;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--b3-theme-on-surface);
+        }
+    }
+
+    .add-platform-form {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        padding: 12px;
+        background: var(--b3-theme-background);
+        border-radius: 4px;
+        margin-bottom: 16px;
+    }
+
+    .platform-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+    .platform-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px;
+        background: var(--b3-theme-background);
+        border-radius: 6px;
+        border: 1px solid var(--b3-border-color);
+        cursor: pointer;
+        transition: all 0.2s;
+
+        &:hover {
+            background: var(--b3-theme-surface);
+            border-color: var(--b3-theme-primary);
+        }
+
+        &.platform-item--selected {
+            background: var(--b3-theme-primary-lightest);
+            border-color: var(--b3-theme-primary);
+        }
+    }
+
+    .platform-item__info {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        flex: 1;
+    }
+
+    .platform-item__name {
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--b3-theme-on-background);
+    }
+
+    .platform-item__type {
+        font-size: 11px;
+        color: var(--b3-theme-on-surface-light);
+        padding: 2px 6px;
+        background: var(--b3-theme-surface);
+        border-radius: 10px;
+        align-self: flex-start;
+    }
+
+    .empty-hint {
+        padding: 20px;
+        text-align: center;
+        color: var(--b3-theme-on-surface-light);
+        font-size: 13px;
     }
 </style>
