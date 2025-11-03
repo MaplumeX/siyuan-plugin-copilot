@@ -399,7 +399,10 @@
                 .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                 .replace(/\*(.*?)\*/g, '<em>$1</em>')
                 .replace(/`([^`]+)`/g, '<code>$1</code>')
-                .replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre><code class="language-$1">$2</code></pre>')
+                .replace(
+                    /```(\w+)?\n([\s\S]*?)```/g,
+                    '<pre><code class="language-$1">$2</code></pre>'
+                )
                 .replace(/\n/g, '<br>');
         } catch (error) {
             console.error('Format message error:', error);
@@ -410,7 +413,7 @@
     // 高亮代码块
     function highlightCodeBlocks(element: HTMLElement) {
         if (!element) return;
-        
+
         // 使用 tick 确保 DOM 已更新
         tick().then(() => {
             try {
@@ -419,23 +422,27 @@
                 }
 
                 const hljs = (window as any).hljs;
-                
+
                 // 处理思源的代码块结构: div.hljs > div[contenteditable]
-                const siyuanCodeBlocks = element.querySelectorAll('div.hljs > div[contenteditable="true"]');
+                const siyuanCodeBlocks = element.querySelectorAll(
+                    'div.hljs > div[contenteditable="true"]'
+                );
                 siyuanCodeBlocks.forEach((block: HTMLElement) => {
                     // 检查是否已经高亮过（通过检查是否有 hljs 的高亮 class）
                     if (block.querySelector('.hljs-keyword, .hljs-string, .hljs-comment')) {
                         return;
                     }
-                    
+
                     try {
                         const code = block.textContent || '';
                         const parent = block.parentElement as HTMLElement;
-                        
+
                         // 尝试从父元素获取语言信息
                         let language = '';
-                        const langAttr = parent.getAttribute('data-node-id') || parent.getAttribute('data-subtype');
-                        
+                        const langAttr =
+                            parent.getAttribute('data-node-id') ||
+                            parent.getAttribute('data-subtype');
+
                         // 自动检测语言并高亮
                         let highlighted;
                         if (language) {
@@ -443,24 +450,29 @@
                         } else {
                             highlighted = hljs.highlightAuto(code);
                         }
-                        
+
                         // 将高亮后的 HTML 设置到 contenteditable 元素中
                         block.innerHTML = highlighted.value;
-                        
+
                         // 标记已处理，添加一个自定义属性
                         block.setAttribute('data-highlighted', 'true');
                     } catch (error) {
                         console.error('Highlight siyuan code block error:', error);
                     }
                 });
-                
+
                 // 处理标准的 pre > code 结构（作为后备）
-                const standardCodeBlocks = element.querySelectorAll('pre > code:not([data-highlighted])');
+                const standardCodeBlocks = element.querySelectorAll(
+                    'pre > code:not([data-highlighted])'
+                );
                 standardCodeBlocks.forEach((block: HTMLElement) => {
-                    if (block.classList.contains('hljs') || block.getAttribute('data-highlighted')) {
+                    if (
+                        block.classList.contains('hljs') ||
+                        block.getAttribute('data-highlighted')
+                    ) {
                         return;
                     }
-                    
+
                     try {
                         hljs.highlightElement(block);
                         block.setAttribute('data-highlighted', 'true');
@@ -468,7 +480,6 @@
                         console.error('Highlight standard code block error:', error);
                     }
                 });
-                
             } catch (error) {
                 console.error('Highlight code blocks error:', error);
             }
@@ -1366,11 +1377,11 @@
             // 重置一些可能冲突的样式
             :global(p) {
                 margin: 0.5em 0;
-                
+
                 &:first-child {
                     margin-top: 0;
                 }
-                
+
                 &:last-child {
                     margin-bottom: 0;
                 }
@@ -1382,7 +1393,7 @@
                 border-radius: 6px;
                 background: var(--b3-theme-surface);
                 overflow: hidden;
-                
+
                 // contenteditable 内的代码
                 :global(> div[contenteditable]) {
                     padding: 12px;
@@ -1392,11 +1403,11 @@
                     line-height: 1.5;
                     white-space: pre;
                     color: var(--b3-theme-on-surface);
-                    
+
                     // 禁用编辑（因为这是只读显示）
                     pointer-events: none;
                     user-select: text;
-                    
+
                     // hljs 语法高亮的颜色会自动应用
                     // 确保高亮类正确显示
                     :global(.hljs-keyword),
@@ -1422,7 +1433,7 @@
                 overflow-x: auto;
                 background: var(--b3-theme-surface);
                 padding: 12px;
-                
+
                 :global(code) {
                     font-family: var(--b3-font-family-code);
                     font-size: 0.9em;
@@ -1450,16 +1461,22 @@
             }
 
             // 列表样式
-            :global(ul), :global(ol) {
+            :global(ul),
+            :global(ol) {
                 margin: 0.5em 0;
                 padding-left: 2em;
             }
 
             // 标题样式
-            :global(h1), :global(h2), :global(h3), :global(h4), :global(h5), :global(h6) {
+            :global(h1),
+            :global(h2),
+            :global(h3),
+            :global(h4),
+            :global(h5),
+            :global(h6) {
                 margin: 0.8em 0 0.4em;
                 font-weight: 600;
-                
+
                 &:first-child {
                     margin-top: 0;
                 }
@@ -1485,7 +1502,7 @@
             :global(a) {
                 color: var(--b3-theme-primary);
                 text-decoration: none;
-                
+
                 &:hover {
                     text-decoration: underline;
                 }
