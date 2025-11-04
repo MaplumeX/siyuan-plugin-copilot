@@ -375,9 +375,9 @@
                 on:changed={onChanged}
             />
         {:else if focusGroup === t('settings.settingsGroup.platformManagement')}
-            <div class="platform-management-panel">
-                <div class="provider-configs">
-                    <!-- 统一平台管理面板 -->
+            <!-- 新的侧边栏布局：左侧为平台列表/操作，右侧为平台配置主区域 -->
+            <div class="platform-management-layout">
+                <aside class="platform-sidebar">
                     <div class="unified-platform-manager">
                         <div class="manager-header">
                             <h5>{t('platform.management')}</h5>
@@ -389,11 +389,10 @@
                             </button>
                         </div>
 
-                        <!-- 添加平台表单 -->
                         {#if showAddPlatform}
                             <div class="add-platform-form">
                                 <div class="b3-label">
-                                    <div class="b3-label__text">{t('platform.name')}</div>
+                                    <div>{t('platform.name')}</div>
                                     <input
                                         class="b3-text-field fn__flex-1"
                                         type="text"
@@ -412,7 +411,6 @@
                             </div>
                         {/if}
 
-                        <!-- 平台列表 -->
                         <div class="platform-list">
                             {#each allProviderOptions as platform}
                                 <div
@@ -435,7 +433,9 @@
                                     <div class="platform-item__info">
                                         <span class="platform-item__name">{platform.name}</span>
                                         <span class="platform-item__type">
-                                            {platform.type === 'built-in' ? t('platform.type.builtin') : t('platform.type.custom')}
+                                            {platform.type === 'built-in'
+                                                ? t('platform.type.builtin')
+                                                : t('platform.type.custom')}
                                         </span>
                                     </div>
                                     <button
@@ -454,8 +454,9 @@
                             {/if}
                         </div>
                     </div>
+                </aside>
 
-                    <!-- 显示选中平台的配置 -->
+                <main class="platform-main">
                     {#if selectedProviderId}
                         {#if builtInProviderNames[selectedProviderId]}
                             {#key selectedProviderId}
@@ -489,8 +490,12 @@
                                 {/if}
                             {/each}
                         {/if}
+                    {:else}
+                        <div class="no-selection">
+                            {t('platform.selectHint') || '请选择一个平台以查看或编辑其配置'}
+                        </div>
                     {/if}
-                </div>
+                </main>
             </div>
         {:else}
             <SettingPanel
@@ -521,21 +526,33 @@
         padding: 2px;
     }
 
-    .platform-management-panel {
+    /* 平台管理：侧边栏布局 */
+    .platform-management-layout {
         display: flex;
-        flex-direction: column;
         gap: 16px;
         height: 100%;
+        align-items: stretch;
     }
 
-    .provider-configs {
+    .platform-sidebar {
+        width: 260px;
+        flex-shrink: 0;
+        padding: 16px 8px 16px 0;
+    }
+
+    .platform-main {
+        flex: 1;
         padding: 16px;
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
+        min-width: 0;
     }
 
-    // 移除不再使用的样式
+    .no-selection {
+        padding: 24px;
+        background: var(--b3-theme-background);
+        border: 1px dashed var(--b3-border-color);
+        border-radius: 6px;
+        color: var(--b3-theme-on-surface-light);
+    }
 
     .unified-platform-manager {
         background: var(--b3-theme-surface);
@@ -571,7 +588,7 @@
         display: flex;
         flex-direction: column;
         gap: 8px;
-        max-height: 300px;
+        max-height: 550px;
         overflow-y: auto;
     }
 
