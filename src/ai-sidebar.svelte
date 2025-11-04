@@ -2080,7 +2080,7 @@
                     <!-- 显示模式 -->
                     <div
                         class="ai-message__content protyle-wysiwyg"
-                        style={messageFontSize && messageFontSize !== 12
+                        style={messageFontSize
                             ? `font-size: ${messageFontSize}px;`
                             : ''}
                     >
@@ -2166,7 +2166,7 @@
                 {#if streamingMessage}
                     <div
                         class="ai-message__content protyle-wysiwyg"
-                        style={messageFontSize && messageFontSize !== 12
+                        style={messageFontSize
                             ? `font-size: ${messageFontSize}px;`
                             : ''}
                     >
