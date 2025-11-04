@@ -391,7 +391,7 @@
 
                         {#if showAddPlatform}
                             <div class="add-platform-form">
-                                <div class="b3-label">
+                                <div>
                                     <div>{t('platform.name')}</div>
                                     <input
                                         class="b3-text-field fn__flex-1"
@@ -558,6 +558,7 @@
         background: var(--b3-theme-surface);
         border-radius: 6px;
         padding: 16px;
+        height: 600px;
     }
 
     .manager-header {
