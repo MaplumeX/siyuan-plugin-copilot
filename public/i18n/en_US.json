@@ -252,7 +252,7 @@
             "volcano": "Volcano Engine"
         },
         "select": "Please select platform",
-    "selectHint": "Please select a platform to view or edit its configuration",
+        "selectHint": "Please select a platform to view or edit its configuration",
         "unknown": "Unknown platform",
         "add": "+ Add Platform",
         "cancel": "Cancel",

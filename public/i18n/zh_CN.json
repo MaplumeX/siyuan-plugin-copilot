@@ -251,7 +251,7 @@
             "volcano": "火山引擎"
         },
         "select": "请选择平台",
-    "selectHint": "请选择一个平台以查看或编辑其配置",
+        "selectHint": "请选择一个平台以查看或编辑其配置",
         "unknown": "未知平台",
         "add": "+ 添加平台",
         "cancel": "取消",
