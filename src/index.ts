@@ -25,7 +25,6 @@ import "@/index.scss";
 import SettingPanel from "./setting-example.svelte";
 import { getDefaultSettings } from "./defaultSettings";
 import { setPluginInstance, t } from "./utils/i18n";
-import LoadingDialog from "./components/LoadingDialog.svelte";
 import AISidebar from "./ai-sidebar.svelte";
 import { updateSettings } from "./stores/settings";
 

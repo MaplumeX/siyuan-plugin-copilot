@@ -389,16 +389,19 @@
     function isAtBottom() {
         if (!messagesContainer) return true;
         const threshold = 100; // 100px的阈值
-        const scrollBottom = messagesContainer.scrollHeight - messagesContainer.scrollTop - messagesContainer.clientHeight;
+        const scrollBottom =
+            messagesContainer.scrollHeight -
+            messagesContainer.scrollTop -
+            messagesContainer.clientHeight;
         return scrollBottom < threshold;
     }
 
     // 处理滚动事件
     function handleScroll() {
         if (!messagesContainer) return;
-        
+
         const atBottom = isAtBottom();
-        
+
         // 如果用户滚动到底部附近，恢复自动滚动
         if (atBottom) {
             autoScroll = true;

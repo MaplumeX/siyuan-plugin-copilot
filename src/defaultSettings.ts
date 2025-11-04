@@ -61,6 +61,9 @@ export const getDefaultSettings = () => ({
     // 操作设置
     sendMessageShortcut: 'ctrl+enter' as 'ctrl+enter' | 'enter', // 发送消息的快捷键
 
+    // 显示设置
+    messageFontSize: 12 as number, // 消息字体大小
+
     // 保留旧设置以便兼容升级
     aiProvider: 'openai',
     aiApiKey: '',

@@ -6,7 +6,7 @@
             "aiPlatform": "AI 平台配置",
             "systemPrompt": "系统提示词",
             "platformManagement": "平台管理",
-            "operation": "操作设置",
+            "displayAndOperation": "显示与操作",
             "group1": "页签1",
             "group2": "页签2",
             "reset": "重置设置"
@@ -61,6 +61,10 @@
                 "ctrlEnter": "Ctrl + Enter发送，Enter换行",
                 "enter": "Enter发送，Shift + Enter换行"
             }
+        },
+        "messageFontSize": {
+            "title": "消息字体大小",
+            "description": "调整消息内容的字体大小（8-32px，默认12px）"
         },
         "textinput": {
             "title": "文本输入",

@@ -220,7 +220,7 @@
             items: [],
         },
         {
-            name: t('settings.settingsGroup.operation'),
+            name: t('settings.settingsGroup.displayAndOperation'),
             items: [
                 {
                     key: 'sendMessageShortcut',
@@ -231,6 +231,18 @@
                     options: {
                         'ctrl+enter': t('settings.sendMessageShortcut.options.ctrlEnter'),
                         enter: t('settings.sendMessageShortcut.options.enter'),
+                    },
+                },
+                {
+                    key: 'messageFontSize',
+                    value: settings.messageFontSize,
+                    type: 'number',
+                    title: t('settings.messageFontSize.title'),
+                    description: t('settings.messageFontSize.description'),
+                    number: {
+                        min: 5,
+                        max: 32,
+                        step: 1,
                     },
                 },
             ],

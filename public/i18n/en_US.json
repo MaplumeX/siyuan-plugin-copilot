@@ -6,7 +6,7 @@
             "aiPlatform": "AI Platform Configuration",
             "systemPrompt": "System Prompt",
             "platformManagement": "Platform Management",
-            "operation": "Operation Settings",
+            "displayAndOperation": "Display & Operation",
             "group1": "Tab1",
             "group2": "Tab2",
             "reset": "Reset Settings"
@@ -61,6 +61,10 @@
                 "ctrlEnter": "Ctrl + Enter to send, Enter to line break",
                 "enter": "Enter to send, Shift + Enter to line break"
             }
+        },
+        "messageFontSize": {
+            "title": "Message Font Size",
+            "description": "Adjust the font size of message content (8-32px, default 12px)"
         },
         "textinput": {
             "title": "Text Input",
