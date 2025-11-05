@@ -215,10 +215,12 @@
         },
         "search": {
             "title": "搜索文档",
-            "placeholder": "输入关键词，自动搜索",
+            "placeholder": "输入关键词搜索，留空显示当前文档",
             "add": "添加到上下文",
             "noResults": "未找到相关文档",
-            "searching": "搜索中..."
+            "searching": "搜索中...",
+            "currentDoc": "当前文档",
+            "noCurrentDoc": "未找到当前文档"
         },
         "errors": {
             "imageOnly": "只支持图片文件",
@@ -328,6 +330,10 @@
         "searchAndAdd": "搜索并添加模型",
         "settings": "设置",
         "configComplete": "加载配置文件完成"
+    },
+    "toolbar": {
+        "aiChat": "AI 问答",
+        "aiChatDialog": "AI 助手"
     },
     "models": {
         "fetchSuccess": "成功获取 {count} 个模型",

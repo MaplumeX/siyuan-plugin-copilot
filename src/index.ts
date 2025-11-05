@@ -11,7 +11,6 @@ import {
     IModel,
     Protyle,
     openWindow,
-    IOperation,
     Constants,
     openMobileFileById,
     lockScreen,
@@ -26,6 +25,7 @@ import SettingPanel from "./setting-example.svelte";
 import { getDefaultSettings } from "./defaultSettings";
 import { setPluginInstance, t } from "./utils/i18n";
 import AISidebar from "./ai-sidebar.svelte";
+import ChatDialog from "./components/ChatDialog.svelte";
 import { updateSettings } from "./stores/settings";
 
 export const SETTINGS_FILE = "settings.json";
@@ -36,6 +36,7 @@ const AI_SIDEBAR_TYPE = "ai-chat-sidebar";
 
 export default class PluginSample extends Plugin {
     private aiSidebarApp: AISidebar;
+    private chatDialogs: Map<string, { dialog: Dialog; app: ChatDialog }> = new Map();
 
     async onload() {
         // 插件被启用时会自动调用这个函数
@@ -80,6 +81,82 @@ export default class PluginSample extends Plugin {
     async onLayoutReady() {
         //布局加载完成的时候,会自动调用这个函数
 
+    }
+
+    /**
+     * 自定义编辑器工具栏
+     */
+    updateProtyleToolbar(toolbar: Array<string | any>) {
+        toolbar.push("|");
+        toolbar.push({
+            name: "ai-chat-with-selection",
+            icon: "iconCopilot",
+            hotkey: "⇧⌘A",
+            tipPosition: "n",
+            tip: t("toolbar.aiChat"),
+            click: (protyle: any) => {
+                this.openChatDialog(protyle);
+            }
+        });
+        return toolbar;
+    }
+
+    /**
+     * 打开AI聊天对话框
+     */
+    private async openChatDialog(protyle: any) {
+        // 获取选中的文本
+        let selectedText = '';
+        
+        try {
+            // 尝试获取选中的内容
+            const selection = window.getSelection();
+            if (selection && selection.toString().trim()) {
+                selectedText = selection.toString().trim();
+            } else if (protyle?.wysiwyg?.element) {
+                // 如果没有选中，尝试获取光标所在块的内容
+                const focusElement = protyle.wysiwyg.element.querySelector('.protyle-wysiwyg--hl');
+                if (focusElement) {
+                    selectedText = focusElement.textContent || '';
+                }
+            }
+        } catch (error) {
+            console.error('Failed to get selected text:', error);
+        }
+
+        // 生成唯一的对话框ID
+        const dialogId = `chat-dialog-${Date.now()}`;
+
+        // 创建对话框
+        const dialog = new Dialog({
+            title: t("toolbar.aiChatDialog"),
+            content: `<div id="${dialogId}" style="height: 100%;"></div>`,
+            width: "800px",
+            height: "700px",
+            destroyCallback: () => {
+                // 清理对话框实例
+                const dialogData = this.chatDialogs.get(dialogId);
+                if (dialogData?.app) {
+                    dialogData.app.$destroy();
+                }
+                this.chatDialogs.delete(dialogId);
+            }
+        });
+
+        // 创建聊天组件
+        const chatApp = new ChatDialog({
+            target: dialog.element.querySelector(`#${dialogId}`),
+            props: {
+                plugin: this,
+                initialMessage: selectedText ? `> ${selectedText}\n\n` : '',
+                onClose: () => {
+                    dialog.destroy();
+                }
+            }
+        });
+
+        // 保存对话框实例
+        this.chatDialogs.set(dialogId, { dialog, app: chatApp });
     }
 
     async onunload() {

@@ -216,10 +216,12 @@
         },
         "search": {
             "title": "Search Documents",
-            "placeholder": "Enter keywords for auto search",
+            "placeholder": "Enter keywords to search, leave empty to show current doc",
             "add": "Add to Context",
             "noResults": "No related documents found",
-            "searching": "Searching..."
+            "searching": "Searching...",
+            "currentDoc": "Current Doc",
+            "noCurrentDoc": "No current document found"
         },
         "errors": {
             "imageOnly": "Only image files are supported",
@@ -329,6 +331,10 @@
         "searchAndAdd": "Search and Add Models",
         "settings": "Settings",
         "configComplete": "Configuration loading completed"
+    },
+    "toolbar": {
+        "aiChat": "AI Chat",
+        "aiChatDialog": "AI Assistant"
     },
     "models": {
         "fetchSuccess": "Successfully fetched {count} models",

@@ -24,6 +24,8 @@
     import { t } from './utils/i18n';
 
     export let plugin: any;
+    export let initialMessage: string = ''; // 初始消息
+    export let mode: 'sidebar' | 'dialog' = 'sidebar'; // 使用模式：sidebar或dialog
 
     interface ChatSession {
         id: string;
@@ -143,6 +145,16 @@
         // 如果有系统提示词，添加到消息列表
         if (settings.aiSystemPrompt) {
             messages = [{ role: 'system', content: settings.aiSystemPrompt }];
+        }
+
+        // 如果有初始消息，自动填充到输入框
+        if (initialMessage) {
+            currentInput = initialMessage;
+            // 在dialog模式下，自动聚焦输入框
+            if (mode === 'dialog') {
+                await tick();
+                textareaElement?.focus();
+            }
         }
 
         // 订阅设置变化
@@ -1447,13 +1459,37 @@
 
     // 搜索文档
     async function searchDocuments() {
-        if (!searchKeyword.trim()) {
-            searchResults = [];
-            return;
-        }
-
         isSearching = true;
         try {
+            // 如果没有输入关键词，显示当前文档
+            if (!searchKeyword.trim()) {
+                const currentProtyle = getActiveEditor(false)?.protyle;
+                const blockId = currentProtyle?.block?.id;
+                
+                if (blockId) {
+                    // 获取当前文档信息
+                    const blocks = await sql(`SELECT * FROM blocks WHERE id = '${blockId}' OR root_id = '${blockId}'`);
+                    if (blocks && blocks.length > 0) {
+                        // 查找文档块
+                        const docBlock = blocks.find(b => b.type === 'd');
+                        if (docBlock) {
+                            searchResults = [docBlock];
+                        } else {
+                            // 如果当前块不是文档块，获取所属文档
+                            const rootId = blocks[0].root_id;
+                            const rootBlocks = await sql(`SELECT * FROM blocks WHERE id = '${rootId}' AND type = 'd'`);
+                            searchResults = rootBlocks || [];
+                        }
+                    } else {
+                        searchResults = [];
+                    }
+                } else {
+                    searchResults = [];
+                }
+                isSearching = false;
+                return;
+            }
+
             // 将空格分隔的关键词转换为 SQL LIKE 查询
             // 转义单引号以防止SQL注入
             const keywords = searchKeyword
@@ -1682,7 +1718,7 @@
             if (ele && ele.innerText) {
                 // 获取块ID字符串，可能是单个ID或逗号分隔的多个ID
                 const blockIdStr = ele.innerText;
-                
+
                 // 分割成多个块ID（多选时用逗号分隔）
                 const blockIds = blockIdStr
                     .split(',')
@@ -1702,7 +1738,7 @@
                         }
                     }
                 }
-                
+
                 (window as any).siyuan.dragElement = undefined;
             }
         } else if (event.dataTransfer.types.includes(Constants.SIYUAN_DROP_TAB)) {
@@ -3092,7 +3128,13 @@
             </button>
             <button
                 class="b3-button b3-button--text ai-sidebar__search-btn"
-                on:click={() => (isSearchDialogOpen = !isSearchDialogOpen)}
+                on:click={() => {
+                    isSearchDialogOpen = !isSearchDialogOpen;
+                    // 打开对话框时，如果搜索关键词为空，自动加载当前文档
+                    if (isSearchDialogOpen && !searchKeyword.trim()) {
+                        searchDocuments();
+                    }
+                }}
                 title={t('aiSidebar.actions.search')}
             >
                 <svg class="b3-button__icon"><use xlink:href="#iconSearch"></use></svg>
@@ -3292,19 +3334,26 @@
                             {#each searchResults as result (result.id)}
                                 <div class="ai-sidebar__search-result-item">
                                     <div class="ai-sidebar__search-result-title">
-                                        {result.content || '未命名文档'}
+                                        {result.content || t('common.untitled')}
+                                        {#if !searchKeyword.trim()}
+                                            <span class="ai-sidebar__search-current-doc-badge">
+                                                {t('aiSidebar.search.currentDoc')}
+                                            </span>
+                                        {/if}
                                     </div>
                                     <button
                                         class="b3-button b3-button--text"
                                         on:click={() =>
-                                            addDocumentToContext(result.id, result.content)}
+                                            addDocumentToContext(result.id, result.content || t('common.untitled'))}
                                     >
-                                        添加
+                                        {t('aiSidebar.search.add')}
                                     </button>
                                 </div>
                             {/each}
                         {:else if !isSearching && searchKeyword}
-                            <div class="ai-sidebar__search-empty">未找到相关文档</div>
+                            <div class="ai-sidebar__search-empty">{t('aiSidebar.search.noResults')}</div>
+                        {:else if !isSearching && !searchKeyword}
+                            <div class="ai-sidebar__search-empty">{t('aiSidebar.search.noCurrentDoc')}</div>
                         {/if}
                     </div>
                 </div>
@@ -4647,6 +4696,20 @@
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .ai-sidebar__search-current-doc-badge {
+        display: inline-block;
+        padding: 2px 8px;
+        font-size: 12px;
+        color: var(--b3-theme-primary);
+        background: var(--b3-theme-primary-lightest);
+        border-radius: 4px;
+        white-space: nowrap;
+        flex-shrink: 0;
     }
 
     .ai-sidebar__search-empty {
