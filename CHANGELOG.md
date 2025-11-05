@@ -1,4 +1,20 @@
-## 0.0.7 / 20251105
+## v0.0.8 / 20251105
+
+- 支持AI修改思源笔记内容
+  - 支持基于对思源笔记块内容进行直接修改、新增块
+  - 支持自动批准编辑
+  - 支持查看更改情况
+  - 支持AI修改后撤回
+
+---
+
+- Support AI modification of SiYuan Note content
+  - Support direct modification and adding new blocks based on SiYuan Note block content
+  - Support automatic approval for edits
+  - Support viewing changes
+  - Support undoing AI modifications
+
+## v0.0.7 / 20251105
 
 - 🎨 参考cherrystudio优化API地址提示 [#7](https://github.com/Achuan-2/siyuan-plugin-copilot/issues/7)
 - 🎨 历史对话需要保存上下文文档信息 [#2](https://github.com/Achuan-2/siyuan-plugin-copilot/issues/2)
