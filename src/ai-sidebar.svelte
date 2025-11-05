@@ -1489,7 +1489,7 @@
 
         await saveSessions();
         hasUnsavedChanges = false;
-        
+
         if (!silent) {
             pushMsg(t('aiSidebar.success.saveSessionSuccess'));
         }
