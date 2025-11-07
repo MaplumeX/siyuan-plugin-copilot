@@ -2148,11 +2148,13 @@
                         // 使用思源 API 获取图片文件
                         // 思源笔记的图片路径格式：assets/xxx-xxxxx.png
                         const blob = await getFileBlob(`/data/${imagePath}`);
-                        
+
                         if (blob) {
                             // 从文件路径提取文件名作为默认名称
                             const fileName = imagePath.split('/').pop() || 'image.png';
-                            const file = new File([blob], imageName || fileName, { type: blob.type });
+                            const file = new File([blob], imageName || fileName, {
+                                type: blob.type,
+                            });
 
                             // 将图片转换为 base64 并添加为附件
                             const base64 = await fileToBase64(file);
