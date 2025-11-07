@@ -1,3 +1,16 @@
+## v0.2.1 / 20251107
+
+- 🎨 重构添加上下文逻辑 [#15](https://github.com/Achuan-2/siyuan-plugin-copilot/issues/15)
+
+  修改上下文逻辑
+  - 目前的逻辑：上下文每次移到最新的对话，感觉还是固定在第一次会话好了
+  - 可以参考Github Copilot的逻辑，改为当前上下文而不是全局上下文逻辑
+    - 添加上下文，在聊天框显示
+    - 发送消息，上下文会直接跟着发送的对话发送，不一直显示在聊天框方式，在用户提问的下面的上下文依然可以点击跳转
+- ✨ 支持拖动块上传图片 [#14](https://github.com/Achuan-2/siyuan-plugin-copilot/issues/14)
+- 🐛 增强 API 请求错误信息的捕获和显示
+- ✨ 添加消息右键菜单：可以选择复制、编辑、编辑、重新生成
+
 ## v0.2.0 / 20251106
 
 - ✨ 新增agent模式 [#9](https://github.com/Achuan-2/siyuan-plugin-copilot/issues/9)
