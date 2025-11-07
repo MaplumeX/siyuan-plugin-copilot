@@ -1,3 +1,10 @@
+
+## v0.2.2 / 20251107
+- ✨ 支持多模型对话 [#22](https://github.com/Achuan-2/siyuan-plugin-copilot/issues/22)
+- ✨ 图片和文件显示在对话下面，放在上下文内容里面 [#20](https://github.com/Achuan-2/siyuan-plugin-copilot/issues/20)
+- 📝 docs(工具文档): 更新思源笔记工具的使用说明
+
+
 ## v0.2.1 / 20251107
 
 - 🎨 重构添加上下文逻辑 [#15](https://github.com/Achuan-2/siyuan-plugin-copilot/issues/15)
