@@ -3578,14 +3578,12 @@
 
                         <!-- 显示上下文文档和附件 -->
                         {#if (message.contextDocuments && message.contextDocuments.length > 0) || (message.attachments && message.attachments.length > 0)}
+                            {@const contextCount = (message.contextDocuments?.length || 0) + (message.attachments?.length || 0)}
                             <div class="ai-message__context-docs">
                                 <div class="ai-message__context-docs-title">
-                                    📎 {t('aiSidebar.context.content')}
-                                    {#if message.contextDocuments && message.contextDocuments.length > 0}
-                                        ({message.contextDocuments.length})
-                                    {/if}
+                                    📎 {t('aiSidebar.context.content')} ({contextCount})
                                 </div>
-                                
+
                                 <!-- 显示附件 -->
                                 {#if message.attachments && message.attachments.length > 0}
                                     <div class="ai-message__context-docs-list">
@@ -3614,7 +3612,7 @@
                                         {/each}
                                     </div>
                                 {/if}
-                                
+
                                 <!-- 显示上下文文档链接 -->
                                 {#if message.contextDocuments && message.contextDocuments.length > 0}
                                     <div class="ai-message__context-docs-list">
