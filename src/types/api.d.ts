@@ -63,3 +63,9 @@ interface IResExportResources {
     path: string;
 }
 
+interface IResSearchDocs {
+    box: string;
+    path: string;
+    hPath: string;
+}
+

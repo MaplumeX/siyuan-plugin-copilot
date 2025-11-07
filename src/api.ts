@@ -225,6 +225,15 @@ export async function getIDsByHPath(notebook: NotebookId, path: string): Promise
     return request(url, data);
 }
 
+export async function searchDocs(k: string, flashcard: boolean = false): Promise<IResSearchDocs[]> {
+    let data = {
+        k: k,
+        flashcard: flashcard
+    };
+    let url = '/api/filetree/searchDocs';
+    return request(url, data);
+}
+
 // **************************************** Asset Files ****************************************
 
 export async function upload(assetsDirPath: string, files: any[]): Promise<IResUpload> {
@@ -522,7 +531,7 @@ export async function readDir(path: string): Promise<IResReadDir> {
 
 // **************************************** Export ****************************************
 
-export async function exportMdContent(id: DocumentId,yfm: boolean=false,fillCSSVar: boolean=false,refMode: number=2,embedMode: number=0,adjustHeadingLevel: boolean=false): Promise<IResExportMdContent> {
+export async function exportMdContent(id: DocumentId, yfm: boolean = false, fillCSSVar: boolean = false, refMode: number = 2, embedMode: number = 0, adjustHeadingLevel: boolean = false): Promise<IResExportMdContent> {
     let data = {
         id: id,
         yfm: yfm,
