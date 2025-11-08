@@ -110,8 +110,9 @@
                 }
             });
             // 按模型ID升序排序
-            availableModels = Array.from(uniqueModelsMap.values())
-                .sort((a, b) => a.id.localeCompare(b.id));
+            availableModels = Array.from(uniqueModelsMap.values()).sort((a, b) =>
+                a.id.localeCompare(b.id)
+            );
             showModelSearchModal = true;
             searchQuery = '';
             pushMsg(t('models.fetchSuccess').replace('{count}', availableModels.length.toString()));
