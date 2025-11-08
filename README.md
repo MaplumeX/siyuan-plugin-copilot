@@ -1,99 +1,38 @@
+SiYuan Notes AI Assistant Plugin, which enables rich functionalities such as Q&A and editing based on the content of SiYuan Notes.
 
-An AI assistant plugin for SiYuan Note, providing rich Q&A and editing features based on SiYuan Note content.
+**Note**: Using this plugin requires you to prepare your own API keys from AI platforms. The plugin itself does not provide AI services. Please comply with the terms of use and privacy policies of each platform.
 
-**Note**: Using this plugin requires your own AI platform API keys. The plugin itself does not provide AI services. Please comply with each platform's terms of use and privacy policies.
-
-> For friends who need to use top-tier models like GPT5, Gemini 2.5 Pro, Claude 4.5
-> - Recommend [V3 API website](https://api.gpt.ge/register?aff=fQIZ), very useful, pay-per-use, can use various AI models, can save a lot compared to official APIs. Register with my [invitation link](https://api.gpt.ge/register?aff=fQIZ) to get $0.3 balance reward for trial.
+> For friends who need to use top-tier models like GPT-5, Gemini 2.5 Pro, Claude 4.5, etc.
+> - Recommended [V3 API Website](https://api.gpt.ge/register?aff=fQIZ). It's very easy to use, pay-as-you-go, supports various AI models, and can save you a lot of money compared to using the official API. Register using my [invitation link](https://api.gpt.ge/register?aff=fQIZ) to get a $0.3 balance bonus for trial.
 
 ## 📝 Changelog
 
-See [CHANGELOG.md](https://cdn.jsdelivr.net/gh/Achuan-2/siyuan-plugin-copilot@main/CHANGELOG.md)
+See [CHANGELOG.md](https://cdn.jsdelivr.net/gh/Achuan-2/SiYuan-plugin-copilot@main/CHANGELOG.md)
 
-## ✨ Core Features
+## ✨ Main Features
 
-### 🤖 Multi-Platform AI Support
+- Multi-platform AI Support:
+  - Built-in support for common platforms (OpenAI, Google Gemini, DeepSeek, Volcano Engine)
+  - Also supports adding any platform compatible with the OpenAI API, allowing flexible switching of chat models
+- Model Settings
+  - Supports independent configuration of parameters for each model (temperature, max tokens)
+  - Identifies special model capabilities (thinking mode, vision support)
+- Three Chat Mode Switching: Switch between ask, edit, and agent chat modes
+  - Ask Mode: For daily Q&A, supports selecting multiple models to reply simultaneously and choosing satisfactory answers
+  - Edit Mode: For editing and modifying notes, supports viewing differences after editing and undo functionality
+  - Agent Mode: Provides tools for the AI to autonomously query note content, edit notes, create documents, etc.
+- Conversation Management
+  - Supports saving conversation history, pinning and deleting historical records
+  - Supports copying conversations as Markdown
+  - Supports saving conversations as documents
+- Multimodal Support
+  - SiYuan Notes Content: Upload note content by dragging blocks, dragging page tabs, or dragging documents from the document tree
+  - Image Upload: Supports pasting, uploading images, and also supports dragging image blocks directly for upload
+  - File Upload (Supports Markdown, text files, etc.)
+- Prompt Management
+  - Supports creating and saving commonly used prompts for quick insertion into the input box
 
-- **Built-in Platform Support**
-  - OpenAI (GPT Series)
-  - Google Gemini
-  - DeepSeek
-  - Volcano Engine (Doubao)
-  
-- **Custom Platforms**
-  - Support adding any OpenAI-compatible API platform
-  - Flexible API endpoint and key configuration
-  - Support for privately deployed large language models
-
-### 💬 Intelligent Conversation Features
-
-- **Multimodal Support**
-  - Text conversations
-  - Image recognition (paste, upload, drag & drop)
-  - File upload (Markdown, text files, etc.)
-  - Mixed input of multiple content types
-
-- **Thinking Mode Support**
-  - Support for models with thinking processes like DeepSeek, OpenAI o1 series
-  - Real-time streaming display of thinking process
-  - Collapsible/expandable detailed thinking content
-
-- **Session Management**
-  - Auto-save conversation history
-  - Create and switch between multiple sessions
-  - Smart session title generation
-  - Unsaved changes reminder
-
-### 📚 Document Context Integration
-
-- **Smart Document Search**
-  - Search related documents in SiYuan Note and quickly add them to conversation context
-
-- **Multiple Adding Methods**
-  - Drag and drop document blocks to sidebar
-  - Search and select documents
-  - Directly drag tabs and blocks to add current document/block
-
-- **Context Management**
-  - View list of added documents
-  - One-click jump to original document
-  - Flexibly remove unwanted documents
-  - Support adding multiple documents simultaneously
-
-### ✏️ Support Modifying SiYuan Note Content
-
-- Support direct modification and adding new blocks based on SiYuan Note block content
-- Support automatic approval for edits
-- Support viewing changes
-- Support rollback after AI modifications
-
-### 🎯 Prompt Management
-
-- **Prompt Library**
-  - Create and save commonly used prompts
-  - Edit and delete prompts
-  - One-click use of prompt templates
-  - Quick insert into input box
-
-- **Convenient Access**
-  - Click 📝 icon to open prompt selector
-  - Floating display without interrupting workflow
-  - Support for prompt management dialog
-
-### ⚙️ Flexible Configuration Options
-
-- **Model Configuration**
-  - Each platform supports multiple models
-  - Independent configuration of parameters for each model (temperature, max tokens)
-  - Identify special model capabilities (thinking mode, vision support)
-  - Quick switching between different models
-
-- **System Prompt**
-  - Customize AI assistant behavior and role
-  - Apply to all new sessions
-  - Flexibly adjust output style
-
-## 🔧 Development
+## 🔧 Development Related
 
 ### Local Development
 
@@ -102,27 +41,30 @@ pnpm install
 pnpm run dev
 ```
 
+### Files
+- `src\tools\index.ts`: Implementation code for tools called in agent mode
+
 ## 📄 License
 
 MIT License
 
 ## 🙏 Acknowledgments
 
-- Based on [plugin-sample-vite-svelte](https://github.com/siyuan-note/plugin-sample-vite-svelte/) template
-- Referenced GPT conversation functionality implementation from [sy-f-misc](https://github.com/frostime/sy-f-misc)
+- Developed based on the [plugin-sample-vite-svelte](https://github.com/SiYuan-note/plugin-sample-vite-svelte/) template
+- Referenced the GPT conversation functionality implementation from [sy-f-misc](https://github.com/frostime/sy-f-misc)
 
-## 📮 Feedback & Suggestions
+## 📮 Feedback and Suggestions
 
-For issues or suggestions, please submit at [GitHub Issues](https://github.com/Achuan-2/siyuan-plugin-ai-sidebar/issues).
+If you have any issues or suggestions, please feel free to raise them in [GitHub Issues](https://github.com/Achuan-2/SiYuan-plugin-ai-sidebar/issues).
 
-## ❤️ Made with Love
+## ❤️ Powered by Love
 
-If you like my plugin, please star the GitHub repository and tip via WeChat, which will motivate me to continue improving this plugin and developing new ones.
+If you like my plugin, you are welcome to give a star on the GitHub repository and offer appreciation via WeChat. This will motivate me to continue improving this plugin and developing new ones.
 
-Maintaining plugins takes time and effort, personal time and energy are limited. Open source is just sharing, not equal to wasting my time to help users implement features they need for free.
+Maintaining plugins is time-consuming and labor-intensive. Personal time and energy are limited. Open source is about sharing, but it does not mean I have to waste my time implementing features for users for free.
 
-Features I need will be gradually improved (tips can encourage updates), some features I think can be improved but are not necessary at this stage require tips to improve (will be marked with tip labels and required amounts), while unnecessary features or features that are very difficult to implement will directly close issues without consideration.
+I will gradually improve features that I need. Appreciation can expedite updates. For some features I think can be improved but are not currently necessary, they may require appreciation to be prioritized (marked with an appreciation tag and the required amount). Features that are not needed or are very complicated to implement will have their issues closed directly without consideration.
 
-Friends who have accumulated $50 in tips and want to add me on WeChat can send an email to achuan-2@outlook.com for friend requests (I won't reply to emails or add friends if the tips don't reach $50, because I don't want to be a free customer service)
+Friends who have accumulated appreciation totaling 50 RMB and wish to add me on WeChat can send an email to <span data-type="a" data-href="mailto:achuan-2@outlook.com">achuan-2@outlook.com</span> to request adding as a friend (If the appreciation does not reach 50 RMB, I will not reply to the email or add you as a friend, as I do not wish to be a free customer service representative).
 
 ![image](https://camo.githubusercontent.com/8052f6f2e7dafba534e781934efa9bcb084fa3a9dfa5c221a85ac63db8b043cb/68747470733a2f2f6173736574732e62336c6f6766696c652e636f6d2f73697975616e2f313631303230353735393030352f6173736574732f6e6574776f726b2d61737365742d696d6167652d32303235303631343132333535382d667568697235762e706e67)
