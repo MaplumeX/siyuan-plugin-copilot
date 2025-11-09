@@ -264,7 +264,7 @@
             const config = getProviderAndModelConfig(model.provider, model.modelId);
             return config !== null; // 只保留有效的模型
         });
-        
+
         // 如果过滤后的模型列表与原列表不同，保存更新后的列表
         if (selectedMultiModels.length !== (settings.selectedMultiModels || []).length) {
             settings.selectedMultiModels = selectedMultiModels;
@@ -324,7 +324,7 @@
                         return config !== null;
                     });
                     selectedMultiModels = validModels;
-                    
+
                     // 如果过滤后的模型列表与原列表不同，更新设置
                     if (validModels.length !== newSettings.selectedMultiModels.length) {
                         settings.selectedMultiModels = validModels;
@@ -2785,8 +2785,8 @@
             // 使用思源的 Lute 将 HTML 转换为 Markdown
             if (window.Lute) {
                 const lute = window.Lute.New();
-                let markdown= lute.HTML2Md(html);
-                
+                let markdown = lute.HTML2Md(html);
+
                 // 将Markdown写入剪贴板
                 event.clipboardData?.setData('text/plain', markdown);
             } else {
@@ -4335,7 +4335,7 @@
 
         const message = messages[editingMessageIndex];
         const newContent = editingMessageContent.trim();
-        
+
         // 如果是多模型响应，更新被选中的模型的内容
         if (message.multiModelResponses && message.multiModelResponses.length > 0) {
             const selectedIndex = message.multiModelResponses.findIndex(r => r.isSelected);
@@ -4349,7 +4349,7 @@
             // 普通消息，直接更新 content
             message.content = newContent;
         }
-        
+
         messages = [...messages];
         hasUnsavedChanges = true;
 
@@ -4386,7 +4386,7 @@
         // 检查目标消息或后续消息是否包含多模型响应
         let useMultiModel = false;
         let previousMultiModels: Array<{ provider: string; modelId: string }> = [];
-        
+
         if (targetMessage.role === 'assistant' && targetMessage.multiModelResponses) {
             useMultiModel = true;
             // 提取之前使用的模型列表
@@ -4401,7 +4401,11 @@
         if (targetMessage.role === 'user') {
             // 检查下一条消息是否是多模型响应
             const nextMessage = messages[index + 1];
-            if (nextMessage && nextMessage.role === 'assistant' && nextMessage.multiModelResponses) {
+            if (
+                nextMessage &&
+                nextMessage.role === 'assistant' &&
+                nextMessage.multiModelResponses
+            ) {
                 useMultiModel = true;
                 previousMultiModels = nextMessage.multiModelResponses.map(r => ({
                     provider: r.provider,
@@ -4444,7 +4448,10 @@
 
             // 如果没有有效的模型，回退到单模型生成
             if (validPreviousModels.length === 0) {
-                pushMsg(t('aiSidebar.info.noValidMultiModels') || '之前选择的多模型已失效，将使用当前选择的模型重新生成');
+                pushMsg(
+                    t('aiSidebar.info.noValidMultiModels') ||
+                        '之前选择的多模型已失效，将使用当前选择的模型重新生成'
+                );
                 // 继续执行后面的单模型生成逻辑
             } else {
                 // 临时保存当前的多模型选择
@@ -4461,7 +4468,7 @@
                 // 恢复原来的设置
                 selectedMultiModels = originalMultiModels;
                 enableMultiModel = originalEnableMultiModel;
-                
+
                 return; // 多模型发送完成，直接返回
             }
         }
@@ -5085,21 +5092,36 @@
                                             {#if currentTabIndex === index}
                                                 <div class="ai-message__multi-model-tab-panel">
                                                     <!-- 添加面板头部，包含复制按钮 -->
-                                                    <div class="ai-message__multi-model-tab-panel-header">
-                                                        <div class="ai-message__multi-model-tab-panel-title">
-                                                            <span class="ai-message__multi-model-tab-panel-model-name">
+                                                    <div
+                                                        class="ai-message__multi-model-tab-panel-header"
+                                                    >
+                                                        <div
+                                                            class="ai-message__multi-model-tab-panel-title"
+                                                        >
+                                                            <span
+                                                                class="ai-message__multi-model-tab-panel-model-name"
+                                                            >
                                                                 {response.modelName}
                                                             </span>
                                                         </div>
-                                                        <div class="ai-message__multi-model-tab-panel-actions">
+                                                        <div
+                                                            class="ai-message__multi-model-tab-panel-actions"
+                                                        >
                                                             {#if !response.error && response.content}
                                                                 <button
                                                                     class="b3-button b3-button--text ai-sidebar__multi-model-copy-btn"
-                                                                    on:click={() => copyMessage(response.content || '')}
-                                                                    title={t('aiSidebar.actions.copyMessage')}
+                                                                    on:click={() =>
+                                                                        copyMessage(
+                                                                            response.content || ''
+                                                                        )}
+                                                                    title={t(
+                                                                        'aiSidebar.actions.copyMessage'
+                                                                    )}
                                                                 >
                                                                     <svg class="b3-button__icon">
-                                                                        <use xlink:href="#iconCopy"></use>
+                                                                        <use
+                                                                            xlink:href="#iconCopy"
+                                                                        ></use>
                                                                     </svg>
                                                                 </button>
                                                             {/if}
@@ -5654,9 +5676,7 @@
                                             </span>
                                         </div>
                                         {#if !thinkingCollapsed[`multi_${index}_thinking`]}
-                                            <div
-                                                class="ai-message__thinking-content b3-typography"
-                                            >
+                                            <div class="ai-message__thinking-content b3-typography">
                                                 {@html formatMessage(response.thinking)}
                                             </div>
                                         {/if}
@@ -5756,7 +5776,8 @@
                                             {#if !response.isLoading && !response.error}
                                                 <button
                                                     class="b3-button b3-button--text ai-sidebar__multi-model-copy-btn"
-                                                    on:click={() => copyMessage(response.content || '')}
+                                                    on:click={() =>
+                                                        copyMessage(response.content || '')}
                                                     title={t('aiSidebar.actions.copyMessage')}
                                                 >
                                                     <svg class="b3-button__icon">
@@ -7172,7 +7193,6 @@
         overflow-x: auto;
         user-select: text; // 允许鼠标选择文本进行复制
         cursor: text; // 显示文本选择光标
-
     }
 
     .ai-message--user {
