@@ -234,6 +234,7 @@
         thinking?: string;
         isLoading: boolean;
         error?: string;
+        thinkingCollapsed?: boolean;
     }> = []; // 多模型响应
     let isWaitingForAnswerSelection = false; // 是否在等待用户选择答案
     let selectedAnswerIndex: number | null = null; // 用户选择的答案索引
@@ -810,6 +811,7 @@
                 content: '',
                 thinking: '',
                 isLoading: true,
+                thinkingCollapsed: false,
             };
         });
 
@@ -840,6 +842,12 @@
                             multiModelResponses[index].thinking = thinking;
                             multiModelResponses = [...multiModelResponses];
                         },
+                        onThinkingComplete: () => {
+                            if (multiModelResponses[index].thinking) {
+                                multiModelResponses[index].thinkingCollapsed = true;
+                                multiModelResponses = [...multiModelResponses];
+                            }
+                        },
                         onChunk: async (chunk: string) => {
                             fullText += chunk;
                             multiModelResponses[index].content = fullText;
@@ -849,6 +857,9 @@
                             multiModelResponses[index].content = convertLatexToMarkdown(text);
                             multiModelResponses[index].thinking = thinking;
                             multiModelResponses[index].isLoading = false;
+                            if (thinking && !multiModelResponses[index].thinkingCollapsed) {
+                                multiModelResponses[index].thinkingCollapsed = true;
+                            }
                             multiModelResponses = [...multiModelResponses];
                         },
                         onError: (error: Error) => {
@@ -5784,13 +5795,29 @@
 
                             <!-- 思考过程 -->
                             {#if response.thinking}
-                                <div class="thinking-process">
-                                    <div class="thinking-header">
-                                        <span>{t('aiSidebar.thinkingProcess')}</span>
+                                <div class="ai-message__thinking">
+                                    <div
+                                        class="ai-message__thinking-header"
+                                        on:click={() => {
+                                            multiModelResponses[index].thinkingCollapsed = !multiModelResponses[index].thinkingCollapsed;
+                                            multiModelResponses = [...multiModelResponses];
+                                        }}
+                                    >
+                                        <svg
+                                            class="ai-message__thinking-icon"
+                                            class:collapsed={response.thinkingCollapsed}
+                                        >
+                                            <use xlink:href="#iconRight"></use>
+                                        </svg>
+                                        <span class="ai-message__thinking-title">
+                                            💭 {t('aiSidebar.thinkingProcess')}
+                                        </span>
                                     </div>
-                                    <div class="thinking-content">
-                                        {@html marked.parse(response.thinking)}
-                                    </div>
+                                    {#if !response.thinkingCollapsed}
+                                        <div class="ai-message__thinking-content b3-typography">
+                                            {@html formatMessage(response.thinking)}
+                                        </div>
+                                    {/if}
                                 </div>
                             {/if}
 
@@ -5915,16 +5942,13 @@
                                             <div
                                                 class="ai-message__thinking-header"
                                                 on:click={() => {
-                                                    const key = `multi_tab_${selectedTabIndex}_thinking`;
-                                                    thinkingCollapsed[key] =
-                                                        !thinkingCollapsed[key];
+                                                    multiModelResponses[selectedTabIndex].thinkingCollapsed = !multiModelResponses[selectedTabIndex].thinkingCollapsed;
+                                                    multiModelResponses = [...multiModelResponses];
                                                 }}
                                             >
                                                 <svg
                                                     class="ai-message__thinking-icon"
-                                                    class:collapsed={thinkingCollapsed[
-                                                        `multi_tab_${selectedTabIndex}_thinking`
-                                                    ]}
+                                                    class:collapsed={response.thinkingCollapsed}
                                                 >
                                                     <use xlink:href="#iconRight"></use>
                                                 </svg>
@@ -5932,7 +5956,7 @@
                                                     💭 思考过程
                                                 </span>
                                             </div>
-                                            {#if !thinkingCollapsed[`multi_tab_${selectedTabIndex}_thinking`]}
+                                            {#if !response.thinkingCollapsed}
                                                 <div
                                                     class="ai-message__thinking-content b3-typography"
                                                 >
