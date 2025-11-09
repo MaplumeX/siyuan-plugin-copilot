@@ -2713,7 +2713,7 @@
         const range = selection.getRangeAt(0);
         const container = range.commonAncestorContainer;
 
-        // 查找最近的 .protyle-wysiwyg 父元素
+        // 查找最近的 .b3-typography 父元素
         let element: HTMLElement | null =
             container.nodeType === Node.ELEMENT_NODE
                 ? (container as HTMLElement)
@@ -2721,7 +2721,7 @@
 
         let isInMessageContent = false;
         while (element) {
-            if (element.classList && element.classList.contains('protyle-wysiwyg')) {
+            if (element.classList && element.classList.contains('b3-typography')) {
                 isInMessageContent = true;
                 break;
             }
@@ -4890,7 +4890,7 @@
                                     <span class="ai-message__thinking-title">💭 思考过程</span>
                                 </div>
                                 {#if !thinkingCollapsed[thinkingIndex]}
-                                    <div class="ai-message__thinking-content protyle-wysiwyg">
+                                    <div class="ai-message__thinking-content b3-typography">
                                         {@html formatMessage(message.thinking)}
                                     </div>
                                 {/if}
@@ -4900,7 +4900,7 @@
                         <!-- 显示消息内容（只有在有实际内容时才显示） -->
                         {#if message.content && message.content.toString().trim()}
                             <div
-                                class="ai-message__content protyle-wysiwyg"
+                                class="ai-message__content b3-typography"
                                 style={messageFontSize ? `font-size: ${messageFontSize}px;` : ''}
                             >
                                 {@html formatMessage(message.content)}
@@ -4986,7 +4986,7 @@
                                                             </div>
                                                             {#if !thinkingCollapsed[`history_multi_${messageIndex}_${msgIndex}_${index}_thinking`]}
                                                                 <div
-                                                                    class="ai-message__thinking-content protyle-wysiwyg"
+                                                                    class="ai-message__thinking-content b3-typography"
                                                                 >
                                                                     {@html formatMessage(
                                                                         response.thinking
@@ -4997,7 +4997,7 @@
                                                     {/if}
 
                                                     <div
-                                                        class="ai-message__multi-model-tab-panel-content protyle-wysiwyg"
+                                                        class="ai-message__multi-model-tab-panel-content b3-typography"
                                                         style={messageFontSize
                                                             ? `font-size: ${messageFontSize}px;`
                                                             : ''}
@@ -5197,7 +5197,7 @@
                         <!-- 显示工具调用后的最终回复 -->
                         {#if message.role === 'assistant' && message.finalReply}
                             <div
-                                class="ai-message__content ai-message__final-reply protyle-wysiwyg"
+                                class="ai-message__content ai-message__final-reply b3-typography"
                                 style={messageFontSize ? `font-size: ${messageFontSize}px;` : ''}
                             >
                                 {@html formatMessage(message.finalReply)}
@@ -5364,12 +5364,12 @@
                             </span>
                         </div>
                         {#if !isThinkingPhase}
-                            <div class="ai-message__thinking-content protyle-wysiwyg">
+                            <div class="ai-message__thinking-content b3-typography">
                                 {@html formatMessage(streamingThinking)}
                             </div>
                         {:else}
                             <div
-                                class="ai-message__thinking-content ai-message__thinking-content--streaming protyle-wysiwyg"
+                                class="ai-message__thinking-content ai-message__thinking-content--streaming b3-typography"
                             >
                                 {@html formatMessage(streamingThinking)}
                             </div>
@@ -5379,7 +5379,7 @@
 
                 {#if streamingMessage}
                     <div
-                        class="ai-message__content protyle-wysiwyg"
+                        class="ai-message__content b3-typography"
                         style={messageFontSize ? `font-size: ${messageFontSize}px;` : ''}
                     >
                         {@html formatMessage(streamingMessage)}
@@ -5494,7 +5494,7 @@
                                         </div>
                                         {#if !thinkingCollapsed[`multi_${index}_thinking`]}
                                             <div
-                                                class="ai-message__thinking-content protyle-wysiwyg"
+                                                class="ai-message__thinking-content b3-typography"
                                             >
                                                 {@html formatMessage(response.thinking)}
                                             </div>
@@ -5503,7 +5503,7 @@
                                 {/if}
 
                                 <div
-                                    class="ai-sidebar__multi-model-card-content protyle-wysiwyg"
+                                    class="ai-sidebar__multi-model-card-content b3-typography"
                                     style={messageFontSize
                                         ? `font-size: ${messageFontSize}px;`
                                         : ''}
@@ -5628,7 +5628,7 @@
                                             </div>
                                             {#if !thinkingCollapsed[`multi_tab_${selectedTabIndex}_thinking`]}
                                                 <div
-                                                    class="ai-message__thinking-content protyle-wysiwyg"
+                                                    class="ai-message__thinking-content b3-typography"
                                                 >
                                                     {@html formatMessage(response.thinking)}
                                                 </div>
@@ -5637,7 +5637,7 @@
                                     {/if}
 
                                     <div
-                                        class="ai-sidebar__multi-model-tab-panel-content protyle-wysiwyg"
+                                        class="ai-sidebar__multi-model-tab-panel-content b3-typography"
                                         style={messageFontSize
                                             ? `font-size: ${messageFontSize}px;`
                                             : ''}
@@ -6999,157 +6999,6 @@
         user-select: text; // 允许鼠标选择文本进行复制
         cursor: text; // 显示文本选择光标
 
-        // 使用protyle-wysiwyg样式，支持思源的富文本渲染
-        &.protyle-wysiwyg {
-            // 重置一些可能冲突的样式
-            :global(p) {
-                margin: 0.5em 0;
-
-                &:first-child {
-                    margin-top: 0;
-                }
-
-                &:last-child {
-                    margin-bottom: 0;
-                }
-            }
-
-            // 思源代码块样式: div.hljs
-            :global(div.hljs) {
-                margin: 8px 0;
-                border-radius: 6px;
-                background: var(--b3-theme-surface);
-
-                // contenteditable 内的代码
-                :global(> div[contenteditable]) {
-                    padding: 12px;
-                    font-family: var(--b3-font-family-code);
-                    font-size: 0.9em;
-                    line-height: 1.5;
-                    white-space: pre;
-                    color: var(--b3-theme-on-surface);
-
-                    // 禁用编辑（因为这是只读显示）
-                    pointer-events: none;
-                    user-select: text;
-
-                    // hljs 语法高亮的颜色会自动应用
-                    // 确保高亮类正确显示
-                    :global(.hljs-keyword),
-                    :global(.hljs-selector-tag),
-                    :global(.hljs-literal),
-                    :global(.hljs-section),
-                    :global(.hljs-link) {
-                        font-weight: normal;
-                    }
-                }
-            }
-
-            // 标准代码块样式（后备）
-            :global(.code-block) {
-                margin: 8px 0;
-                border-radius: 6px;
-            }
-
-            :global(pre) {
-                margin: 8px 0;
-                border-radius: 6px;
-                overflow-x: auto;
-                background: var(--b3-theme-surface);
-                padding: 12px;
-
-                :global(code) {
-                    font-family: var(--b3-font-family-code);
-                    font-size: 0.9em;
-                    line-height: 1.5;
-                }
-            }
-
-            // 行内代码样式
-            :global(code:not(pre code):not(div.hljs code)) {
-                padding: 2px 6px;
-                border-radius: 4px;
-                font-size: 0.9em;
-                background: var(--b3-theme-surface);
-                font-family: var(--b3-font-family-code);
-            }
-
-            // 数学公式样式
-            :global(.katex-display) {
-                margin: 1em 0;
-                overflow-x: auto;
-            }
-
-            :global(.katex) {
-                font-size: 1em;
-            }
-
-            // 确保 katex-display 内部的 katex-html 显示为块级元素
-            :global(.katex-display > .katex > .katex-html) {
-                display: block !important;
-            }
-
-            // 列表样式
-            :global(ul),
-            :global(ol) {
-                margin: 0.5em 0;
-                padding-left: 2em;
-            }
-
-            // 标题样式
-            :global(h1),
-            :global(h2),
-            :global(h3),
-            :global(h4),
-            :global(h5),
-            :global(h6) {
-                margin: 0.8em 0 0.4em;
-                font-weight: 600;
-
-                &:first-child {
-                    margin-top: 0;
-                }
-            }
-
-            // 引用样式
-            :global(blockquote) {
-                margin: 0.5em 0;
-                padding-left: 1em;
-                border-left: 3px solid var(--b3-theme-primary);
-            }
-
-            // 表格样式
-            :global(table) {
-                margin: 0.5em 0;
-                border-collapse: collapse;
-                width: 100%;
-                overflow-x: auto;
-                display: block;
-            }
-
-            // 链接样式
-            :global(a) {
-                color: var(--b3-theme-primary);
-                text-decoration: none;
-
-                &:hover {
-                    text-decoration: underline;
-                }
-            }
-
-            // 图片样式
-            :global(img) {
-                max-width: 100%;
-                height: auto;
-            }
-
-            // 分割线
-            :global(hr) {
-                margin: 1em 0;
-                border: none;
-                border-top: 1px solid var(--b3-border-color);
-            }
-        }
     }
 
     .ai-message--user {
