@@ -2882,23 +2882,39 @@
         const range = selection.getRangeAt(0);
         const container = range.commonAncestorContainer;
 
-        // 查找最近的 .b3-typography 父元素
+        // 只在插件本身的消息容器内处理复制，避免影响思源全局的复制行为。
+        // messagesContainer 在组件中已被声明并用于渲染消息列表。
+        // 我们要求选区既位于 messagesContainer 的子节点内，且在消息内容元素（.b3-typography）内。
+        const messagesContainerEl = (messagesContainer as HTMLElement) || null;
+        if (!messagesContainerEl) {
+            // 没有消息容器引用，则不处理，保留默认复制行为
+            return;
+        }
+
+        // 查找选区最近的元素节点起点
         let element: HTMLElement | null =
             container.nodeType === Node.ELEMENT_NODE
                 ? (container as HTMLElement)
-                : container.parentElement;
+                : (container.parentElement as HTMLElement | null);
 
+        let isInPluginContainer = false;
         let isInMessageContent = false;
+
         while (element) {
+            if (element === messagesContainerEl) {
+                isInPluginContainer = true;
+            }
             if (element.classList && element.classList.contains('b3-typography')) {
                 isInMessageContent = true;
-                break;
             }
+            // 如果同时满足在容器内且位于消息内容，则可处理
+            if (isInPluginContainer && isInMessageContent) break;
+
             element = element.parentElement;
         }
 
-        // 如果不在消息内容区域，不处理
-        if (!isInMessageContent) {
+        // 只有当选区在本插件的 messagesContainer 且在 .b3-typography 内，才处理转换
+        if (!(isInPluginContainer && isInMessageContent)) {
             return;
         }
 
