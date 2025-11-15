@@ -3138,9 +3138,7 @@
         tick().then(() => {
             try {
                 // 查找所有思源块引用链接 a[href^="siyuan://blocks/"]
-                const blockRefLinks = element.querySelectorAll(
-                    'a[href^="siyuan://blocks/"]'
-                );
+                const blockRefLinks = element.querySelectorAll('a[href^="siyuan://blocks/"]');
 
                 blockRefLinks.forEach((link: HTMLElement) => {
                     // 检查是否已经添加过监听器
@@ -5593,7 +5591,9 @@
                         {/if}
 
                         <!-- 显示消息内容（只有在有实际内容时才显示，且没有多模型响应时才显示） -->
-                        {#if message.content && message.content.toString().trim() && !(message.role === 'assistant' && message.multiModelResponses && message.multiModelResponses.length > 0)}
+                        {#if message.content && message.content
+                                .toString()
+                                .trim() && !(message.role === 'assistant' && message.multiModelResponses && message.multiModelResponses.length > 0)}
                             <div
                                 class="ai-message__content b3-typography"
                                 style={messageFontSize ? `font-size: ${messageFontSize}px;` : ''}
