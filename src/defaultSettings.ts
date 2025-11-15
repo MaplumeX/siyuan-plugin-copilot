@@ -81,6 +81,17 @@ export const getDefaultSettings = () => ({
     // 多模型设置
     selectedMultiModels: [] as Array<{ provider: string; modelId: string }>, // 选中的多模型列表
 
+    // 模型预设设置
+    modelPresets: [] as Array<{
+        id: string;
+        name: string;
+        contextCount: number;
+        temperature: number;
+        systemPrompt: string;
+        createdAt: number;
+    }>,
+    selectedModelPresetId: '' as string,
+
     // 笔记导出设置
     exportNotebook: '' as string,  // 导出笔记本ID
     exportDefaultPath: '' as string,  // 全局保存文档位置（支持sprig语法）

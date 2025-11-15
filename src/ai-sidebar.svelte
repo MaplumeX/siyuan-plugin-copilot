@@ -6682,6 +6682,7 @@
                 {currentModelId}
                 appliedSettings={tempModelSettings}
                 on:apply={handleApplyModelSettings}
+                {plugin}
             />
             {#if !(chatMode === 'ask' && enableMultiModel)}
                 <div class="ai-sidebar__model-selector-container">

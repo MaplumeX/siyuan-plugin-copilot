@@ -12,6 +12,7 @@
         temperature: 0.7,
         systemPrompt: '',
     };
+    export let plugin: any;
 
     const dispatch = createEventDispatcher();
 
@@ -57,39 +58,34 @@
     }
 
     // 加载预设
-    function loadPresets() {
-        const stored = localStorage.getItem('copilot-model-settings-presets');
-        if (stored) {
-            try {
-                presets = JSON.parse(stored);
-            } catch (e) {
-                console.error('Failed to load presets:', e);
-                presets = [];
-            }
-        }
+    async function loadPresets() {
+        const settings = await plugin.loadSettings();
+        presets = settings.modelPresets || [];
+        selectedPresetId = settings.selectedModelPresetId || '';
     }
 
-    // 保存预设到本地存储
-    function savePresetsToStorage() {
-        localStorage.setItem('copilot-model-settings-presets', JSON.stringify(presets));
+    // 保存预设到设置
+    async function savePresetsToStorage() {
+        const settings = await plugin.loadSettings();
+        settings.modelPresets = presets;
+        await plugin.saveSettings(settings);
     }
 
     // 保存选中的预设ID
-    function saveSelectedPresetId(presetId: string) {
-        if (presetId) {
-            localStorage.setItem('copilot-model-settings-selected-preset', presetId);
-        } else {
-            localStorage.removeItem('copilot-model-settings-selected-preset');
-        }
+    async function saveSelectedPresetId(presetId: string) {
+        const settings = await plugin.loadSettings();
+        settings.selectedModelPresetId = presetId;
+        await plugin.saveSettings(settings);
     }
 
     // 加载选中的预设ID
-    function loadSelectedPresetId(): string {
-        return localStorage.getItem('copilot-model-settings-selected-preset') || '';
+    async function loadSelectedPresetId(): Promise<string> {
+        const settings = await plugin.loadSettings();
+        return settings.selectedModelPresetId || '';
     }
 
     // 保存当前设置为预设
-    function saveAsPreset() {
+    async function saveAsPreset() {
         if (!newPresetName.trim()) {
             pushMsg(t('aiSidebar.modelSettings.enterPresetName'));
             return;
@@ -105,26 +101,26 @@
         };
 
         presets = [...presets, preset];
-        savePresetsToStorage();
+        await savePresetsToStorage();
         newPresetName = '';
         // 不关闭预设管理器
         // showPresetManager = false;
 
         // 自动选择新建的预设
         selectedPresetId = preset.id;
-        saveSelectedPresetId(preset.id);
+        await saveSelectedPresetId(preset.id);
 
         pushMsg(t('aiSidebar.modelSettings.presetSaved'));
     }
 
     // 加载预设
-    function loadPreset(presetId: string) {
+    async function loadPreset(presetId: string) {
         // 如果点击的是已选择的预设，则取消选择
         if (selectedPresetId === presetId) {
             selectedPresetId = '';
-            saveSelectedPresetId('');
+            await saveSelectedPresetId('');
             // 重置为当前应用的设置
-            resetToAppliedSettings();
+            await resetToAppliedSettings();
             return;
         }
 
@@ -135,7 +131,7 @@
             tempSystemPrompt = preset.systemPrompt;
             selectedPresetId = presetId;
             // 保存选中的预设ID
-            saveSelectedPresetId(presetId);
+            await saveSelectedPresetId(presetId);
         }
     }
 
@@ -147,12 +143,12 @@
         confirm(
             t('aiSidebar.modelSettings.deletePreset'),
             t('aiSidebar.modelSettings.confirmDelete'),
-            () => {
+            async () => {
                 presets = presets.filter(p => p.id !== presetId);
-                savePresetsToStorage();
+                await savePresetsToStorage();
                 if (selectedPresetId === presetId) {
                     selectedPresetId = '';
-                    saveSelectedPresetId('');
+                    await saveSelectedPresetId('');
                 }
                 pushMsg(t('aiSidebar.modelSettings.presetDeleted'));
                 
@@ -175,13 +171,13 @@
     }
 
     // 更新预设
-    function updatePreset(presetId: string) {
+    async function updatePreset(presetId: string) {
         const preset = presets.find(p => p.id === presetId);
         if (preset) {
             preset.contextCount = tempContextCount;
             preset.temperature = tempTemperature;
             preset.systemPrompt = tempSystemPrompt;
-            savePresetsToStorage();
+            await savePresetsToStorage();
             // 触发响应式更新
             presets = [...presets];
             pushMsg(t('aiSidebar.modelSettings.presetUpdated'));
@@ -224,13 +220,13 @@
     }
 
     // 重置临时值为当前应用的设置
-    function resetToAppliedSettings() {
+    async function resetToAppliedSettings() {
         tempContextCount = appliedSettings.contextCount;
         tempTemperature = appliedSettings.temperature;
         tempSystemPrompt = appliedSettings.systemPrompt;
 
         // 检查当前应用的设置是否与某个预设匹配
-        const savedPresetId = loadSelectedPresetId();
+        const savedPresetId = await loadSelectedPresetId();
         if (savedPresetId) {
             const preset = presets.find(p => p.id === savedPresetId);
             if (
@@ -251,21 +247,21 @@
     }
 
     // 重置为默认值
-    function resetToDefaults() {
+    async function resetToDefaults() {
         const modelConfig = getCurrentModelConfig();
         tempContextCount = 10;
         tempTemperature = modelConfig?.temperature ?? 0.7;
         tempSystemPrompt = '';
         selectedPresetId = '';
         // 清除保存的预设ID
-        saveSelectedPresetId('');
+        await saveSelectedPresetId('');
     }
 
     // 打开面板时，重置临时值为当前应用的设置
-    function openDropdown() {
-        resetToAppliedSettings();
+    async function openDropdown() {
+        await resetToAppliedSettings();
         isOpen = true;
-        loadPresets();
+        await loadPresets();
         updateDropdownPosition();
         setTimeout(() => {
             document.addEventListener('click', closeOnOutsideClick);
@@ -331,9 +327,9 @@
     }
 
     // 组件挂载时，自动加载上次选择的预设
-    onMount(() => {
-        loadPresets();
-        const savedPresetId = loadSelectedPresetId();
+    onMount(async () => {
+        await loadPresets();
+        const savedPresetId = await loadSelectedPresetId();
         if (savedPresetId) {
             const preset = presets.find(p => p.id === savedPresetId);
             if (preset) {
@@ -346,7 +342,7 @@
                 applySettings();
             } else {
                 // 预设已被删除，清除保存的ID
-                saveSelectedPresetId('');
+                await saveSelectedPresetId('');
             }
         }
     });
