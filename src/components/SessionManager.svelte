@@ -333,7 +333,6 @@
         renameSession = null;
         renameSessionTitle = '';
     }
-
 </script>
 
 <div class="session-manager">

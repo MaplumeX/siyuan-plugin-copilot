@@ -4562,7 +4562,7 @@
             const session = sessions.find(s => s.id === currentSessionId);
             if (session) {
                 session.messages = [...messages];
-                session.title = generateSessionTitle();
+                // 不再重新生成标题，保留原有标题（可能是默认标题、AI生成的标题或用户手动修改的标题）
                 session.updatedAt = now;
             } else {
                 // 如果会话不存在（可能被其他实例删除），创建为新会话
@@ -5056,7 +5056,14 @@
             // 生成文档名称
             let docName = saveDocumentName.trim();
             if (!docName) {
-                docName = generateSessionTitle();
+                // 优先使用当前会话的标题
+                const currentSession = sessions.find(s => s.id === currentSessionId);
+                if (currentSession) {
+                    docName = currentSession.title;
+                } else {
+                    // 如果没有会话，才使用默认生成方法
+                    docName = generateSessionTitle();
+                }
             }
 
             // 生成 Markdown 内容（不需要一级标题，思源会自动使用文档名作为标题）
