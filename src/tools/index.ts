@@ -20,6 +20,8 @@ import {
     appendBlock,
     getBlockAttrs,
     setBlockAttrs,
+    getNotebookConf,
+    listDocsByPath,
 } from '../api';
 import { getActiveEditor } from 'siyuan';
 
@@ -486,6 +488,56 @@ siyuan_create_document({
         },
     },
 
+    // 获取文档树工具
+    {
+        type: 'function',
+        function: {
+            name: 'siyuan_get_doc_tree',
+            description: `获取指定路径下的子文档结构（文档树结构）
+
+## 何时使用
+- 需要列出某个笔记本下的文档树
+- 需要以树形结构展示文档层级
+- 需要获取文档的子文档列表
+
+## 使用方法
+1. 提供笔记本ID，如果没提供，需要通过sql查询获取box值（select box from blocks where id = 'notebook_id'）
+2. 指定起始路径（根路径为 '/'），如果没提供，需要通过sql查询获取path值（select path from blocks where id = 'block_id'）
+3. 可选排序模式（若不指定，将使用笔记本或全局配置决定）
+
+## 返回格式示例
+[
+  {
+    name: "文档名",
+    id: "文档ID",
+    children: [ ... ]
+  }
+]
+
+## 注意事项
+- 如果笔记本的 sortMode 为 15（文档树排序），函数会读取全局文件树排序设置：window.siyuan.config.fileTree.sort
+- 返回结果为 JSON 数组，节点包含 name、id 和 children 字段，children 为数组（可能为空）`,
+            parameters: {
+                type: 'object',
+                properties: {
+                    notebook: {
+                        type: 'string',
+                        description: '笔记本ID',
+                    },
+                    path: {
+                        type: 'string',
+                        description: "起始路径，默认 '/'",
+                    },
+                    sortMode: {
+                        type: 'number',
+                        description: '可选的排序模式，若不提供将由笔记本或全局配置决定',
+                    },
+                },
+                required: ['notebook'],
+            },
+        },
+    },
+
     // 创建笔记本工具
     {
         type: 'function',
@@ -670,7 +722,7 @@ siyuan_move_documents({
 ## 返回
 - 返回一个对象，键为属性名，值为属性值。
 
-## 对文档块返回的常见属性
+## 对文档块返回的所有属性
 - icon: 文档图标
 - id: 文档 id
 - tags: 文档标签，多个标签使用逗号分隔
@@ -686,6 +738,9 @@ siyuan_move_documents({
 - icon
 - tags
 - title
+
+## 注意
+- 不包含文档路径、归属笔记本等信息，需要通过sql查询
 `,
             parameters: {
                 type: 'object',
@@ -990,6 +1045,60 @@ export async function siyuan_list_notebooks(): Promise<any> {
 }
 
 /**
+ * 递归获取指定路径下的文档树结构
+ */
+export async function siyuan_get_doc_tree(notebook: string, path: string = '/', sortMode?: number): Promise<any[]> {
+    try {
+        // 决定最终的排序模式
+        let finalSortMode = sortMode;
+        if (finalSortMode === undefined || finalSortMode === null) {
+            const confRes: any = await getNotebookConf(notebook);
+            const notebookSortMode = confRes?.conf?.sortMode;
+            if (notebookSortMode === 15) {
+                finalSortMode = window.siyuan?.config?.fileTree?.sort ?? 15;
+            } else {
+                finalSortMode = notebookSortMode ?? 15;
+            }
+        }
+
+        async function fetchDocsRecursively(currentPath: string): Promise<any[]> {
+            try {
+                const res: any = await listDocsByPath(notebook, currentPath, finalSortMode, false, 10000);
+                if (!res || !res.files) {
+                    console.error(`获取路径 [${currentPath}] 失败:`, res);
+                    return [];
+                }
+
+                const docPromises = res.files.map(async (file: any) => {
+                    const node: any = {
+                        name: file.name.replace(/\.sy$/, ''),
+                        id: file.id,
+                        children: [] as any[],
+                    };
+
+                    if (file.subFileCount > 0) {
+                        const childPath = file.path.replace(/\.sy$/, '');
+                        node.children = await fetchDocsRecursively(childPath);
+                    }
+                    return node;
+                });
+
+                return await Promise.all(docPromises);
+
+            } catch (error) {
+                console.error(`处理路径 [${currentPath}] 时发生错误:`, error);
+                return [];
+            }
+        }
+
+        return await fetchDocsRecursively(path);
+    } catch (error) {
+        console.error('Get doc tree error:', error);
+        throw new Error(`获取文档树失败: ${(error as Error).message}`);
+    }
+}
+
+/**
  * 创建笔记本
  */
 export async function siyuan_create_notebook(name: string): Promise<any> {
@@ -1106,6 +1215,12 @@ export async function executeToolCall(toolCall: ToolCall): Promise<string> {
             case 'siyuan_list_notebooks':
                 const notebooks = await siyuan_list_notebooks();
                 return JSON.stringify(notebooks, null, 2);
+
+            case 'siyuan_get_doc_tree':
+                {
+                    const tree = await siyuan_get_doc_tree(args.notebook, args.path || '/', args.sortMode);
+                    return JSON.stringify(tree, null, 2);
+                }
 
             case 'siyuan_create_notebook':
                 const notebook = await siyuan_create_notebook(args.name);

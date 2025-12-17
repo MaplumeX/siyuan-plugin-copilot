@@ -538,6 +538,9 @@
         "siyuan_move_documents": {
             "name": "移动文档"
         },
+        "siyuan_get_doc_tree":{
+            "name": "获取文档树"
+        },
         "calling": "正在调用工具",
         "called": "工具已调用",
         "result": "工具结果",

@@ -36,6 +36,7 @@
                 'siyuan_insert_block',
                 'siyuan_update_block',
                 'siyuan_create_document',
+                'siyuan_get_doc_tree',
                 'siyuan_list_notebooks',
                 'siyuan_create_notebook',
                 'siyuan_rename_document',
@@ -47,9 +48,10 @@
     // 按类别组织工具
     const categorizedTools: Record<string, Tool[]> = {};
     for (const [category, config] of Object.entries(toolCategories)) {
-        categorizedTools[category] = AVAILABLE_TOOLS.filter(tool =>
-            config.tools.includes(tool.function.name)
-        );
+        // 按照 config.tools 中定义的顺序映射工具
+        categorizedTools[category] = config.tools
+            .map(toolName => AVAILABLE_TOOLS.find(tool => tool.function.name === toolName))
+            .filter(tool => tool !== undefined) as Tool[];
     }
 
     // 切换工具选择

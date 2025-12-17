@@ -539,6 +539,9 @@
         "siyuan_move_documents": {
             "name": "Move Documents"
         },
+        "siyuan_get_doc_tree": {
+            "name": "Get Document Tree"
+        },
         "calling": "Calling Tool",
         "called": "Tool Called",
         "result": "Tool Result",

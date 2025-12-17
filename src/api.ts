@@ -234,6 +234,18 @@ export async function getIDsByHPath(notebook: NotebookId, path: string): Promise
     return request(url, data);
 }
 
+export async function listDocsByPath(notebook: NotebookId, path: string, sort: number = 15, showHidden: boolean = false, maxListCount: number = 10000): Promise<any> {
+    let data = {
+        notebook: notebook,
+        path: path,
+        sort: sort,
+        showHidden: showHidden,
+        maxListCount: maxListCount
+    };
+    let url = '/api/filetree/listDocsByPath';
+    return request(url, data);
+}
+
 export async function searchDocs(k: string, flashcard: boolean = false): Promise<IResSearchDocs[]> {
     let data = {
         k: k,
