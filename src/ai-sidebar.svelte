@@ -7098,15 +7098,20 @@
                                         </div>
 
                                         {#if !toolCallCollapsed}
+                                            {@const paramsKey = `${toolCall.id}_params`}
+                                            {@const paramsExpanded =
+                                                toolCallResultsExpanded[paramsKey] !== false}
+                                            {@const resultKey = `${toolCall.id}_result`}
+                                            {@const resultExpanded =
+                                                toolCallResultsExpanded[resultKey] !== false}
                                             <div class="ai-message__tool-call-details">
                                                 <!-- 工具参数 -->
                                                 <div class="ai-message__tool-call-params">
                                                     <div
                                                         class="ai-message__tool-call-section-header"
                                                         on:click={() => {
-                                                            const key = `${toolCall.id}_params`;
-                                                            toolCallResultsExpanded[key] =
-                                                                !toolCallResultsExpanded[key];
+                                                            toolCallResultsExpanded[paramsKey] =
+                                                                !paramsExpanded;
                                                             toolCallResultsExpanded = {
                                                                 ...toolCallResultsExpanded,
                                                             };
@@ -7114,9 +7119,7 @@
                                                     >
                                                         <svg
                                                             class="ai-message__tool-call-icon"
-                                                            class:collapsed={!toolCallResultsExpanded[
-                                                                `${toolCall.id}_params`
-                                                            ]}
+                                                            class:collapsed={!paramsExpanded}
                                                         >
                                                             <use xlink:href="#iconRight"></use>
                                                         </svg>
@@ -7124,7 +7127,7 @@
                                                             {t('tools.selector.parameters')}
                                                         </strong>
                                                     </div>
-                                                    {#if toolCallResultsExpanded[`${toolCall.id}_params`]}
+                                                    {#if paramsExpanded}
                                                         <pre
                                                             class="ai-message__tool-call-code">{toolCall
                                                                 .function.arguments}</pre>
@@ -7137,9 +7140,8 @@
                                                         <div
                                                             class="ai-message__tool-call-section-header"
                                                             on:click={() => {
-                                                                const key = `${toolCall.id}_result`;
-                                                                toolCallResultsExpanded[key] =
-                                                                    !toolCallResultsExpanded[key];
+                                                                toolCallResultsExpanded[resultKey] =
+                                                                    !resultExpanded;
                                                                 toolCallResultsExpanded = {
                                                                     ...toolCallResultsExpanded,
                                                                 };
@@ -7147,15 +7149,13 @@
                                                         >
                                                             <svg
                                                                 class="ai-message__tool-call-icon"
-                                                                class:collapsed={!toolCallResultsExpanded[
-                                                                    `${toolCall.id}_result`
-                                                                ]}
+                                                                class:collapsed={!resultExpanded}
                                                             >
                                                                 <use xlink:href="#iconRight"></use>
                                                             </svg>
                                                             <strong>{t('tools.result')}</strong>
                                                         </div>
-                                                        {#if toolCallResultsExpanded[`${toolCall.id}_result`]}
+                                                        {#if resultExpanded}
                                                             <pre
                                                                 class="ai-message__tool-call-code">{toolResult.content}</pre>
                                                         {/if}
