@@ -1594,6 +1594,25 @@
         autoScroll = true;
         isAborted = false; // 重置中断标志
 
+        // 如果是第一条用户消息且没有会话ID，立即创建会话
+        const userMessages = messages.filter(m => m.role === 'user');
+        if (userMessages.length === 1 && !currentSessionId) {
+            const now = Date.now();
+            const newSession: ChatSession = {
+                id: `session_${now}`,
+                title: generateSessionTitle(),
+                messages: [...messages],
+                createdAt: now,
+                updatedAt: now,
+            };
+            sessions = [newSession, ...sessions];
+            currentSessionId = newSession.id;
+            await saveSessions();
+
+            // 立即执行自动重命名
+            autoRenameSession(userContent);
+        }
+
         await scrollToBottom(true);
 
         // 准备消息数组（包含上下文）
@@ -2040,10 +2059,13 @@
 
         // 自动保存会话
         saveCurrentSession(true);
+
+        // 根据选择的AI回答自动重命名会话标题
+        autoRenameSession(selectedResponse.content);
     }
 
     // 自动重命名会话
-    async function autoRenameSession(userMessage: string) {
+    async function autoRenameSession(content: string) {
         // 检查是否启用自动重命名
         if (!settings.autoRenameSession) {
             console.log('Auto-rename disabled');
@@ -2078,8 +2100,8 @@
             // 使用自定义提示词模板，替换 {message} 占位符
             const promptTemplate =
                 settings.autoRenamePrompt ||
-                '请根据以下用户消息生成一个简洁的会话标题（不超过20个字，不要使用引号）：\n\n{message}';
-            const prompt = promptTemplate.replace('{message}', userMessage);
+                '请根据以下内容生成一个简洁的会话标题（不超过20个字，不要使用引号）：\n\n{message}';
+            const prompt = promptTemplate.replace('{message}', content);
 
             let generatedTitle = '';
 
@@ -3215,6 +3237,11 @@
 
                             // AI 回复完成后，自动保存当前会话
                             await saveCurrentSession(true);
+
+                            // 根据AI回答自动重命名会话标题（仅在非编辑模式下）
+                            if (chatMode !== 'edit') {
+                                autoRenameSession(convertedText);
+                            }
                         },
                         onError: (error: Error) => {
                             // 如果是主动中断，不显示错误
