@@ -1737,7 +1737,10 @@
                         typeof msg.content === 'string'
                             ? msg.content
                             : getMessageText(msg.content || []);
-                    return text && text.toString().trim() !== '';
+                    const hasToolCalls = msg.tool_calls && msg.tool_calls.length > 0;
+                    const hasReasoning = !!msg.reasoning_content;
+                    // 保留有 tool_calls 或 reasoning_content 的 assistant 消息，即便正文为空
+                    return (text && text.toString().trim() !== '') || hasToolCalls || hasReasoning;
                 }
                 return true;
             })
@@ -1954,7 +1957,55 @@
         const systemMessages = messagesToSend.filter(msg => msg.role === 'system');
         const otherMessages = messagesToSend.filter(msg => msg.role !== 'system');
         const limitedMessages = otherMessages.slice(-tempModelSettings.contextCount);
-        messagesToSend = [...systemMessages, ...limitedMessages];
+
+        // 建立 tool_call_id => tool 消息的索引，便于补全被截断的链条
+        const toolResultById = new Map<string, Message>();
+        for (const msg of otherMessages) {
+            if (msg.role === 'tool' && msg.tool_call_id) {
+                toolResultById.set(msg.tool_call_id, msg);
+            }
+        }
+
+        const limitedMessagesWithToolFix: Message[] = [];
+        const includedToolCallIds = new Set<string>();
+
+        for (const msg of limitedMessages) {
+            if (msg.role === 'assistant' && msg.tool_calls && msg.tool_calls.length > 0) {
+                // 先推入 assistant
+                limitedMessagesWithToolFix.push(msg);
+
+                // 紧跟补全每一个 tool_call 的结果，保持顺序
+                for (const tc of msg.tool_calls) {
+                    const toolMsg = toolResultById.get(tc.id);
+                    if (toolMsg && !includedToolCallIds.has(tc.id)) {
+                        limitedMessagesWithToolFix.push(toolMsg);
+                        includedToolCallIds.add(tc.id);
+                    }
+                }
+                continue;
+            }
+
+            if (msg.role === 'tool') {
+                // 仅在前一条是对应的 assistant 且未加入过时保留，避免孤立 tool
+                const prev = limitedMessagesWithToolFix[limitedMessagesWithToolFix.length - 1];
+                if (
+                    prev &&
+                    prev.role === 'assistant' &&
+                    prev.tool_calls?.some(tc => tc.id === msg.tool_call_id) &&
+                    msg.tool_call_id &&
+                    !includedToolCallIds.has(msg.tool_call_id)
+                ) {
+                    limitedMessagesWithToolFix.push(msg);
+                    includedToolCallIds.add(msg.tool_call_id);
+                }
+                continue;
+            }
+
+            // 其他消息正常保留
+            limitedMessagesWithToolFix.push(msg);
+        }
+
+        messagesToSend = [...systemMessages, ...limitedMessagesWithToolFix];
 
         return messagesToSend;
     }
@@ -2239,6 +2290,21 @@
 
         await scrollToBottom(true);
 
+        // DeepSeek 思考模式：开启新一轮对话前清理历史消息中的 reasoning_content，保留工具调用链
+        if (chatMode === 'agent' && currentProvider === 'deepseek') {
+            messages = messages.map(msg => {
+                if (msg.role === 'assistant' && msg.reasoning_content) {
+                    const { reasoning_content, ...rest } = msg as any;
+                    return rest as Message;
+                }
+                return msg;
+            });
+        }
+
+        const isDeepseekThinkingAgent =
+            chatMode === 'agent' && currentProvider === 'deepseek' &&
+            modelConfig.capabilities?.thinking && (modelConfig.thinkingEnabled || false);
+
         // 准备发送给AI的消息（包含系统提示词和上下文文档）
         // 深拷贝消息数组，避免修改原始消息
         // 保留工具调用相关字段（如果存在），以便在 Agent 模式下正确处理历史工具调用
@@ -2251,7 +2317,10 @@
                         typeof msg.content === 'string'
                             ? msg.content
                             : getMessageText(msg.content || []);
-                    return text && text.toString().trim() !== '';
+                    const hasToolCalls = msg.tool_calls && msg.tool_calls.length > 0;
+                    const hasReasoning = !!msg.reasoning_content;
+                    // 保留有 tool_calls 或 reasoning_content 的 assistant 消息，即便正文为空
+                    return (text && text.toString().trim() !== '') || hasToolCalls || hasReasoning;
                 }
                 return true;
             })
@@ -2268,6 +2337,10 @@
                 if (msg.tool_call_id) {
                     baseMsg.tool_call_id = msg.tool_call_id;
                     baseMsg.name = msg.name;
+                }
+
+                if (isDeepseekThinkingAgent && msg.reasoning_content) {
+                    baseMsg.reasoning_content = msg.reasoning_content;
                 }
 
                 // 只处理历史用户消息的上下文（不是最后一条消息）
@@ -2666,7 +2739,55 @@
         const systemMessages = messagesToSend.filter(msg => msg.role === 'system');
         const otherMessages = messagesToSend.filter(msg => msg.role !== 'system');
         const limitedMessages = otherMessages.slice(-tempModelSettings.contextCount);
-        messagesToSend = [...systemMessages, ...limitedMessages];
+
+        // 建立 tool_call_id => tool 消息的索引，便于补全被截断的链条
+        const toolResultById = new Map<string, Message>();
+        for (const msg of otherMessages) {
+            if (msg.role === 'tool' && msg.tool_call_id) {
+                toolResultById.set(msg.tool_call_id, msg);
+            }
+        }
+
+        const limitedMessagesWithToolFix: Message[] = [];
+        const includedToolCallIds = new Set<string>();
+
+        for (const msg of limitedMessages) {
+            if (msg.role === 'assistant' && msg.tool_calls && msg.tool_calls.length > 0) {
+                // 先推入 assistant
+                limitedMessagesWithToolFix.push(msg);
+
+                // 紧跟补全每一个 tool_call 的结果，保持顺序
+                for (const tc of msg.tool_calls) {
+                    const toolMsg = toolResultById.get(tc.id);
+                    if (toolMsg && !includedToolCallIds.has(tc.id)) {
+                        limitedMessagesWithToolFix.push(toolMsg);
+                        includedToolCallIds.add(tc.id);
+                    }
+                }
+                continue;
+            }
+
+            if (msg.role === 'tool') {
+                // 仅在前一条是对应的 assistant 且未加入过时保留，避免孤立 tool
+                const prev = limitedMessagesWithToolFix[limitedMessagesWithToolFix.length - 1];
+                if (
+                    prev &&
+                    prev.role === 'assistant' &&
+                    prev.tool_calls?.some(tc => tc.id === msg.tool_call_id) &&
+                    msg.tool_call_id &&
+                    !includedToolCallIds.has(msg.tool_call_id)
+                ) {
+                    limitedMessagesWithToolFix.push(msg);
+                    includedToolCallIds.add(msg.tool_call_id);
+                }
+                continue;
+            }
+
+            // 其他消息正常保留
+            limitedMessagesWithToolFix.push(msg);
+        }
+
+        messagesToSend = [...systemMessages, ...limitedMessagesWithToolFix];
 
         // 创建新的 AbortController
         abortController = new AbortController();
@@ -2744,6 +2865,11 @@
                                         content: streamingMessage || '',
                                         tool_calls: toolCalls,
                                     };
+
+                                    if (isDeepseekThinkingAgent && streamingThinking) {
+                                        assistantMessage.reasoning_content = streamingThinking;
+                                        assistantMessage.thinking = streamingThinking;
+                                    }
                                     messages = [...messages, assistantMessage];
                                     firstToolCallMessageIndex = messages.length - 1;
                                 } else {
@@ -2753,6 +2879,11 @@
                                         ...(existingMessage.tool_calls || []),
                                         ...toolCalls,
                                     ];
+
+                                    if (isDeepseekThinkingAgent && streamingThinking) {
+                                        existingMessage.reasoning_content = streamingThinking;
+                                        existingMessage.thinking = streamingThinking;
+                                    }
                                     messages = [...messages];
                                 }
                                 streamingMessage = '';
@@ -2854,6 +2985,10 @@
                                         baseMsg.name = msg.name;
                                     }
 
+                                    if (isDeepseekThinkingAgent && msg.reasoning_content) {
+                                        baseMsg.reasoning_content = msg.reasoning_content;
+                                    }
+
                                     return baseMsg;
                                 });
 
@@ -2887,6 +3022,10 @@
                                         // 将AI的最终回复存储到 finalReply 字段
                                         existingMessage.finalReply = convertedText;
 
+                                        if (isDeepseekThinkingAgent && streamingThinking) {
+                                            existingMessage.reasoning_content = streamingThinking;
+                                        }
+
                                         // 添加思考内容（如果有）
                                         if (enableThinking && streamingThinking) {
                                             existingMessage.thinking = streamingThinking;
@@ -2902,6 +3041,9 @@
 
                                         if (enableThinking && streamingThinking) {
                                             assistantMessage.thinking = streamingThinking;
+                                            if (isDeepseekThinkingAgent) {
+                                                assistantMessage.reasoning_content = streamingThinking;
+                                            }
                                         }
 
                                         messages = [...messages, assistantMessage];
