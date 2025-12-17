@@ -3685,8 +3685,8 @@
         if (window.katex) return true;
         // https://github.com/siyuan-note/siyuan/blob/master/app/src/protyle/render/mathRender.ts
         const cdn = Constants.PROTYLE_CDN;
-        addStyle(`${cdn}/js/katex/katex.min.css`, "protyleKatexStyle");
-        await addScript(`${cdn}/js/katex/katex.min.js`, "protyleKatexScript");
+        addStyle(`${cdn}/js/katex/katex.min.css`, 'protyleKatexStyle');
+        await addScript(`${cdn}/js/katex/katex.min.js`, 'protyleKatexScript');
         return window.katex !== undefined && window.katex !== null;
     };
 
