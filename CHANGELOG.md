@@ -1,4 +1,11 @@
 
+## v0.9.1 / 20251221
+- 🎨 json支持检查，格式化和嵌套 ([#87](https://github.com/Achuan-2/siyuan-plugin-copilot/issues/87))
+- 🐛 修复部分回复无法显示问题 ([#89](https://github.com/Achuan-2/siyuan-plugin-copilot/issues/89))
+
+
+Co-authored-by: Xinjie <xinjie_zhou@163.com>
+
 ## v0.9.0 / 20251217 
 - 🎨 agent添加数据库工具 [#60](https://github.com/Achuan-2/siyuan-plugin-copilot/issues/60)
 - 🎨 agent 模式支持获取块属性和设置块属性功能  [#84](https://github.com/Achuan-2/siyuan-plugin-copilot/issues/84)
