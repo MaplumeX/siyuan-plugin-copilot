@@ -7706,7 +7706,7 @@
     {#if contextDocuments.length > 0 || currentAttachments.length > 0}
         <div
             class="ai-sidebar__context-docs"
-            class:ai-sidebar__context-docs--drag-over={isDragOver}
+            class:ai-sidebar__context-docs--drag-over={isDragOver && contextDocuments.length > 0}
             on:dragover={handleDragOver}
             on:dragleave={handleDragLeave}
             on:drop={handleDrop}
@@ -7775,7 +7775,7 @@
     {/if}
     <div
         class="ai-sidebar__input-container"
-        class:ai-sidebar__input-container--drag-over={isDragOver}
+        class:ai-sidebar__input-container--drag-over={isDragOver && contextDocuments.length === 0}
         bind:this={inputContainer}
         on:dragover={handleDragOver}
         on:dragleave={handleDragLeave}
@@ -8761,16 +8761,13 @@
     }
 
     .ai-sidebar__context-docs--drag-over {
-        background: rgba(0, 120, 212, 0.06);
-        border: 1px dashed rgba(0, 120, 212, 0.4);
-        border-radius: 6px;
-        padding: 6px;
+        background: var(--b3-theme-primary-lightest);
+        border: 2px dashed var(--b3-theme-primary);
     }
 
     .ai-sidebar__input-container--drag-over {
-        background: rgba(0, 120, 212, 0.04);
-        border-radius: 6px;
-        box-shadow: inset 0 0 0 1px rgba(0, 120, 212, 0.06);
+        background: var(--b3-theme-primary-lightest);
+        border: 2px dashed var(--b3-theme-primary) !important;
     }
 
     .ai-sidebar__context-docs-title {
