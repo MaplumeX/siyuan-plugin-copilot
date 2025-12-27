@@ -8760,6 +8760,8 @@
 
     .ai-sidebar__context-docs {
         flex-shrink: 0;
+        max-height: 250px;
+        overflow: auto;
     }
 
     .ai-sidebar__context-docs-title {
